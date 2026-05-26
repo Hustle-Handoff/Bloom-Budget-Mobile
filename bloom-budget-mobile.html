@@ -1,0 +1,2006 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Bloom Budget Planner ❖</title>
+<meta name="theme-color" content="#A66880"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+<meta name="apple-mobile-web-app-title" content="Bloom Budget"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<link rel="manifest" href="manifest-mobile.json"/>
+<link rel="apple-touch-icon" href="icon-192.png"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --cream:#FAF6F0;--parchment:#F3EDE3;--blush:#F0DDE5;
+    --rose-lt:#E8C8D4;--rose:#CC8FA4;--rose-dk:#A66880;
+    --lav-lt:#EAE4F5;--lav:#C4B5E8;--lav-dk:#8070B0;
+    --sage-lt:#E4EEE0;--sage:#98C090;--sage-dk:#608858;
+    --peach:#F0D8C0;--sky:#C0D4EE;
+    --plum:#3C2E44;--plum-mid:#6C5878;--plum-lt:#A090AC;
+    --white:#FFFFFF;--danger:#B86878;--gold:#C8A860;
+    --shadow:rgba(60,46,68,0.10);--shadow-lg:rgba(60,46,68,0.16);
+  }
+  html{font-size:15px;scroll-behavior:smooth}
+  body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--plum);min-height:100vh;overflow-x:hidden}
+  input,select,button,textarea{font-family:inherit}
+  input:focus,select:focus{outline:none}
+  ::-webkit-scrollbar{width:5px}
+  ::-webkit-scrollbar-track{background:var(--parchment)}
+  ::-webkit-scrollbar-thumb{background:var(--rose-lt);border-radius:3px}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+  @keyframes shimmer{0%{background-position:-200% center}100%{background-position:200% center}}
+  @keyframes floatPetal{0%{transform:translateY(0) rotate(0deg);opacity:.6}50%{transform:translateY(-12px) rotate(8deg);opacity:1}100%{transform:translateY(0) rotate(0deg);opacity:.6}}
+  .fade-up{animation:fadeUp .5s ease both}
+  .fade-up-2{animation:fadeUp .5s .08s ease both}
+  .fade-up-3{animation:fadeUp .5s .16s ease both}
+  #welcome{position:fixed;inset:0;z-index:1000;background:linear-gradient(145deg,#F5EEE8 0%,#EDE4F0 50%,#E8EEF5 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px;transition:opacity .6s ease,transform .6s ease}
+  #welcome.hidden{opacity:0;transform:scale(1.02);pointer-events:none}
+  .welcome-petals{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+  .petal{position:absolute;width:8px;height:8px;border-radius:50% 0 50% 0;opacity:.4;animation:floatPetal 4s ease-in-out infinite}
+  .welcome-logo{font-family:'Playfair Display',serif;font-size:52px;font-style:italic;background:linear-gradient(135deg,var(--rose-dk),var(--lav-dk),var(--rose-dk));background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:shimmer 4s linear infinite,fadeUp .8s ease both;line-height:1.1;margin-bottom:8px}
+  .welcome-tagline{font-size:12px;letter-spacing:.25em;text-transform:uppercase;color:var(--plum-lt);margin-bottom:40px;animation:fadeUp .8s .15s ease both}
+  .welcome-features{display:flex;gap:24px;flex-wrap:wrap;justify-content:center;margin-bottom:48px;animation:fadeUp .8s .25s ease both}
+  .welcome-feature{background:white;border-radius:14px;padding:18px 22px;box-shadow:0 4px 20px var(--shadow);min-width:150px;border:1px solid var(--rose-lt)}
+  .welcome-feature-icon{font-size:24px;margin-bottom:8px}
+  .welcome-feature-label{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--plum-mid);font-weight:600}
+  .welcome-btn{background:linear-gradient(135deg,var(--rose-dk),var(--lav-dk));color:white;border:none;cursor:pointer;padding:16px 48px;border-radius:50px;font-size:13px;letter-spacing:.15em;text-transform:uppercase;font-weight:600;box-shadow:0 8px 30px rgba(102,80,128,.35);transition:transform .2s,box-shadow .2s;animation:fadeUp .8s .35s ease both}
+  .welcome-btn:hover{transform:translateY(-2px);box-shadow:0 12px 36px rgba(102,80,128,.45)}
+  .welcome-note{margin-top:20px;font-size:11px;color:var(--plum-lt);animation:fadeUp .8s .45s ease both}
+  #app{display:none}
+  #app.visible{display:block}
+  .app-header{background:linear-gradient(135deg,var(--rose-dk) 0%,var(--lav-dk) 100%);padding:16px 20px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;box-shadow:0 4px 24px var(--shadow-lg);position:sticky;top:0;z-index:100}
+  .header-brand{display:flex;align-items:center;gap:14px}
+  .header-logo{font-family:'Playfair Display',serif;font-style:italic;font-size:24px;color:white;letter-spacing:.02em}
+  .header-badge{background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);border-radius:20px;padding:3px 12px;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.85);font-weight:600}
+  .header-controls{display:flex;gap:8px;align-items:center;justify-content:center;padding-left:24px}
+  .header-select{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:10px;color:white;padding:6px 10px;cursor:pointer;font-size:12px;font-weight:600}
+  .header-select option{background:var(--plum);color:white}
+  .save-dot{width:8px;height:8px;border-radius:50%;background:#90D890;box-shadow:0 0 8px #90D890;transition:opacity .5s}
+  .save-label{font-size:11px;color:rgba(255,255,255,.75);letter-spacing:.1em}
+  .app-nav{background:white;border-bottom:1px solid var(--rose-lt);padding:10px 36px;display:flex;gap:6px;flex-wrap:wrap;box-shadow:0 2px 8px rgba(60,46,68,.05)}
+  .nav-btn{padding:8px 18px;border-radius:20px;border:none;cursor:pointer;font-size:12px;letter-spacing:.1em;text-transform:uppercase;font-weight:600;transition:all .2s;color:var(--plum-lt);background:transparent}
+  .nav-btn.active{background:linear-gradient(135deg,var(--rose-dk),var(--lav-dk));color:white;box-shadow:0 4px 14px rgba(102,80,128,.3)}
+  .nav-btn:hover:not(.active){background:var(--lav-lt);color:var(--plum-mid)}
+  .page{padding:28px 36px;max-width:1380px;margin:0 auto}
+  .tab-panel{display:none}
+  .tab-panel.active{display:block}
+  .card{background:white;border-radius:18px;padding:24px;box-shadow:0 2px 16px var(--shadow);border:1px solid var(--rose-lt)}
+  .card-title{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--plum-lt);font-weight:700;margin-bottom:18px;padding-bottom:10px;border-bottom:1px solid var(--rose-lt)}
+  .summary-row{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:22px}
+  .summary-card{flex:1;min-width:160px;border-radius:14px;padding:18px 20px;border-left:4px solid var(--rose);transition:transform .2s,box-shadow .2s}
+  .summary-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px var(--shadow)}
+  .summary-card-label{font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--plum-mid);font-weight:600;margin-bottom:6px}
+  .summary-card-amount{font-family:'Playfair Display',serif;font-size:26px;font-weight:500;color:var(--plum)}
+  .summary-card-sub{font-size:11px;color:var(--plum-lt);margin-top:3px}
+  .field-label{display:block;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--plum-mid);font-weight:600;margin-bottom:6px}
+  .inp{width:100%;padding:10px 13px;border-radius:10px;border:1.5px solid var(--rose-lt);background:var(--cream);color:var(--plum);font-size:13px;transition:border-color .2s,box-shadow .2s}
+  .inp:focus{border-color:var(--lav);box-shadow:0 0 0 3px rgba(196,181,232,.25)}
+  .inp-sm{width:100px;text-align:right}
+  .btn{padding:10px 22px;border-radius:10px;border:none;cursor:pointer;font-size:12px;letter-spacing:.1em;text-transform:uppercase;font-weight:600;transition:all .2s;display:inline-flex;align-items:center;gap:6px}
+  .btn:hover{transform:translateY(-1px)}
+  .btn-primary{background:linear-gradient(135deg,var(--rose-dk),var(--lav-dk));color:white;box-shadow:0 4px 14px rgba(102,80,128,.25)}
+  .btn-primary:hover{box-shadow:0 6px 20px rgba(102,80,128,.35)}
+  .btn-export{background:linear-gradient(135deg,var(--sage-dk),#407838);color:white;box-shadow:0 4px 14px rgba(96,136,88,.25)}
+  .btn-export2{background:linear-gradient(135deg,var(--lav-dk),var(--rose-dk));color:white;box-shadow:0 4px 14px rgba(102,80,128,.25)}
+  .btn-danger{background:var(--danger);color:white}
+  .btn-ghost{background:var(--rose-lt);color:var(--plum-mid)}
+  .btn-sm{padding:6px 14px;font-size:10px}
+  .pill{display:inline-block;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:.08em}
+  .pill-income{background:#E4F0DC;color:var(--sage-dk)}
+  .pill-bills{background:#F8EAD8;color:#906030}
+  .pill-expenses{background:var(--lav-lt);color:var(--lav-dk)}
+  .pill-savings{background:#D8EAF8;color:#407098}
+  .pill-debt{background:#F8DDE4;color:var(--danger)}
+  .tbl{border-radius:12px;overflow:hidden;border:1px solid var(--rose-lt)}
+  .tbl-head{background:linear-gradient(135deg,var(--blush),var(--lav-lt));padding:10px 16px;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--plum-mid);font-weight:700;display:grid;align-items:center}
+  .tbl-row{padding:11px 16px;font-size:12px;display:grid;align-items:center;border-bottom:1px solid var(--rose-lt);transition:background .15s}
+  .tbl-row:last-child{border-bottom:none}
+  .tbl-row:nth-child(even){background:var(--cream)}
+  .tbl-row:hover{background:var(--lav-lt)}
+  .tbl-foot{background:linear-gradient(135deg,var(--blush),var(--lav-lt));padding:10px 16px;font-size:11px;display:grid;align-items:center;font-weight:700;border-top:2px solid var(--rose-lt)}
+  .del-btn{background:none;border:none;cursor:pointer;color:var(--rose-lt);font-size:15px;padding:0;transition:color .15s;line-height:1}
+  .del-btn:hover{color:var(--danger);transform:none}
+  .mini-bar-wrap{margin-bottom:14px}
+  .mini-bar-labels{display:flex;justify-content:space-between;margin-bottom:5px}
+  .mini-bar-label{font-size:12px;color:var(--plum-mid)}
+  .mini-bar-val{font-size:12px;color:var(--plum-lt)}
+  .mini-bar-track{height:7px;background:var(--rose-lt);border-radius:4px;overflow:hidden}
+  .mini-bar-fill{height:100%;border-radius:4px;transition:width .6s cubic-bezier(.4,0,.2,1)}
+  .donut-wrap{display:flex;align-items:center;gap:22px}
+  .budget-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px}
+  .budget-row{display:grid;grid-template-columns:1fr auto;align-items:center;gap:10px;margin-bottom:9px}
+  .budget-cat{font-size:13px;color:var(--plum-mid)}
+  .form-col{display:flex;flex-direction:column;gap:14px}
+  .form-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .export-panel{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .export-card{padding:18px;background:var(--cream);border-radius:12px;border:1px solid var(--rose-lt);margin-bottom:16px}
+  .export-card-lav{background:var(--lav-lt);border-color:var(--lav)}
+  .export-card-title{font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--plum-mid);font-weight:700;margin-bottom:7px}
+  .export-card-desc{font-size:12px;color:var(--plum-lt);line-height:1.6;margin-bottom:12px}
+  .storage-item{display:flex;justify-content:space-between;align-items:center;padding:11px 15px;background:var(--cream);border-radius:10px;border:1px solid var(--rose-lt);margin-bottom:10px}
+  .storage-item-left{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--plum-mid)}
+  .storage-item-val{font-size:11px;font-weight:700;color:var(--lav-dk)}
+  .print-section{border:1.5px solid var(--rose-lt);border-radius:14px;padding:20px;margin-bottom:16px}
+  .print-section-title{font-family:'Playfair Display',serif;font-size:16px;color:var(--plum);margin-bottom:14px;font-style:italic}
+  .print-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dotted var(--rose-lt);font-size:13px;color:var(--plum-mid)}
+  .print-row:last-child{border-bottom:none}
+  .print-row-total{font-weight:700;color:var(--plum)}
+  /* Calendar */
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:12px}
+  .cal-day-hdr{text-align:center;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--plum-lt);font-weight:700;padding:6px 0}
+  .cal-day{min-height:96px;border-radius:12px;border:1.5px solid var(--rose-lt);padding:8px;background:white;cursor:pointer;transition:border-color .2s,box-shadow .2s;position:relative}
+  .cal-day:hover{border-color:var(--lav);box-shadow:0 2px 12px var(--shadow)}
+  .cal-day.today{border-color:var(--rose-dk);background:#FFF5F8}
+  .cal-day.empty{background:var(--parchment);cursor:default;opacity:.4}
+  .cal-day.has-items{background:var(--lav-lt)}
+  .cal-day-num{font-size:13px;font-weight:700;color:var(--plum-mid);margin-bottom:4px}
+  .cal-day.today .cal-day-num{color:var(--rose-dk)}
+  .cal-entry{font-size:10px;border-radius:6px;padding:2px 6px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;display:block}
+  .cal-entry-bill{background:#F8EFE0;color:#906030}
+  .cal-entry-note{background:var(--lav-lt);color:var(--lav-dk)}
+  .cal-add-btn{position:absolute;bottom:5px;right:6px;background:none;border:none;color:var(--rose-lt);font-size:18px;cursor:pointer;line-height:1;padding:0;transition:color .15s}
+  .cal-add-btn:hover{color:var(--rose-dk)}
+  .cal-modal-bg{position:fixed;inset:0;background:rgba(60,46,68,.45);z-index:500;display:flex;align-items:center;justify-content:center}
+  .cal-modal{background:white;border-radius:20px;padding:28px;width:420px;max-width:95vw;box-shadow:0 20px 60px var(--shadow-lg)}
+  .cal-modal-title{font-family:'Playfair Display',serif;font-size:18px;font-style:italic;color:var(--plum);margin-bottom:18px}
+  .cal-entry-list{margin-bottom:16px}
+  .cal-entry-row{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:9px;margin-bottom:6px;font-size:12px}
+  .cal-entry-row-del{background:none;border:none;cursor:pointer;color:var(--rose-lt);font-size:13px;margin-left:auto;transition:color .12s}
+  .cal-entry-row-del:hover{color:var(--danger)}
+  .lbl{display:block;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--plum-mid);font-weight:600;margin-bottom:6px}
+  .app-footer{text-align:center;padding:28px;color:var(--plum-lt);font-size:11px;letter-spacing:.12em;border-top:1px solid var(--rose-lt);margin-top:20px}
+  .footer-logo{font-family:'Playfair Display',serif;font-style:italic;font-size:16px;color:var(--rose-dk);margin-bottom:4px}
+  @media(max-width:768px){.app-header{padding:14px 18px}.page{padding:18px}.summary-row{flex-direction:column}.dashboard-grid{grid-template-columns:1fr!important}.split-layout{grid-template-columns:1fr!important}}
+  @media print{#welcome,.app-header,.app-nav,.app-footer,.btn,.del-btn,.export-panel,.cal-add-btn{display:none!important}.page{padding:0}.card{box-shadow:none;border:1px solid #ccc}}
+
+  /* ══ MORE DROPDOWN ════════════════════════════════════════ */
+  .more-wrap { position: relative; }
+
+  .more-btn {
+    padding: 8px 16px; border-radius: 20px; border: none; cursor: pointer;
+    font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase;
+    font-weight: 700; transition: all 0.25s;
+    color: var(--plum-lt); background: transparent;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .more-btn:hover { background: var(--lav-lt); color: var(--plum-mid); }
+  .more-btn.open {
+    background: linear-gradient(135deg, var(--rose-dk), var(--lav-dk));
+    color: white; box-shadow: 0 4px 14px rgba(102,80,128,0.3);
+  }
+  .more-btn.active {
+    background: linear-gradient(135deg, var(--rose-dk), var(--lav-dk));
+    color: white; box-shadow: 0 4px 14px rgba(102,80,128,0.3);
+  }
+  .more-btn-chevron {
+    font-size: 9px; transition: transform 0.25s; display: inline-block;
+  }
+  .more-btn.open .more-btn-chevron { transform: rotate(180deg); }
+
+  .more-drop {
+    display: none;
+    position: absolute; top: calc(100% + 10px); left: 0;
+    min-width: 210px; z-index: 300;
+    background: white;
+    border-radius: 18px;
+    box-shadow: 0 16px 48px rgba(60,46,68,0.18), 0 2px 8px rgba(60,46,68,0.08);
+    border: 1px solid var(--rose-lt);
+    overflow: hidden;
+    animation: dropIn 0.2s cubic-bezier(0.4,0,0.2,1) both;
+  }
+  .more-drop.open { display: block; }
+  @keyframes dropIn {
+    from { opacity:0; transform: translateY(-8px) scale(0.97); }
+    to   { opacity:1; transform: translateY(0) scale(1); }
+  }
+
+  /* Gradient header strip inside dropdown */
+  .more-drop-header {
+    padding: 12px 18px 10px;
+    background: linear-gradient(135deg, var(--blush), var(--lav-lt));
+    border-bottom: 1px solid var(--rose-lt);
+  }
+  .more-drop-header-label {
+    font-size: 8px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--plum-lt); font-weight: 700;
+  }
+
+  .more-drop-item {
+    display: flex; align-items: center; gap: 12px;
+    width: 100%; padding: 13px 18px;
+    border: none; cursor: pointer; text-align: left;
+    font-size: 12px; font-weight: 600; letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--plum-mid); background: white;
+    transition: all 0.15s;
+    border-bottom: 1px solid var(--rose-lt);
+  }
+  .more-drop-item:last-child { border-bottom: none; }
+  .more-drop-item:hover {
+    background: var(--lav-lt); color: var(--lav-dk);
+    padding-left: 22px;
+  }
+  .more-drop-item.active {
+    background: var(--blush); color: var(--rose-dk);
+  }
+  .more-drop-item-icon {
+    font-size: 16px; width: 24px; text-align: center; flex-shrink: 0;
+  }
+  .more-drop-item-text { flex: 1; }
+  .more-drop-item-arrow {
+    font-size: 10px; color: var(--plum-lt); opacity: 0;
+    transition: opacity 0.15s;
+  }
+  .more-drop-item:hover .more-drop-item-arrow { opacity: 1; }
+
+
+</style>
+</head>
+<body>
+
+<!-- WELCOME -->
+<div id="welcome">
+  <div class="welcome-petals" id="petals"></div>
+  <div class="welcome-logo">Bloom Budget</div>
+  <div class="welcome-tagline">❖ Your beautiful monthly budget planner ❖</div>
+  <div class="welcome-features">
+    <div class="welcome-feature"><div class="welcome-feature-icon">📊</div><div class="welcome-feature-label">Live Dashboard</div></div>
+    <div class="welcome-feature"><div class="welcome-feature-icon">💾</div><div class="welcome-feature-label">Auto-Saves</div></div>
+    <div class="welcome-feature"><div class="welcome-feature-icon">📋</div><div class="welcome-feature-label">Transaction Log</div></div>
+    <div class="welcome-feature"><div class="welcome-feature-icon">📅</div><div class="welcome-feature-label">Bill Calendar</div></div>
+    <div class="welcome-feature"><div class="welcome-feature-icon">⬇️</div><div class="welcome-feature-label">CSV Export</div></div>
+    <div class="welcome-feature"><div class="welcome-feature-icon">🖨️</div><div class="welcome-feature-label">Print Summary</div></div>
+  </div>
+  <button class="welcome-btn" onclick="startApp()">Open My Planner →</button>
+  <p class="welcome-note">Your data saves automatically · Works offline · No account needed</p>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <header class="app-header">
+    <div class="header-brand">
+      <div class="header-logo">❖ Bloom Budget</div>
+      <div class="header-badge">Planner</div>
+    </div>
+    <div class="header-controls">
+      <select class="header-select" id="monthSel" onchange="onMonthChange()"></select>
+      <select class="header-select" id="yearSel"  onchange="onYearChange()"></select>
+    </div>
+    <div style="display:flex;justify-content:flex-end;align-items:center;gap:8px">
+      <span class="save-dot" id="saveDot2" style="opacity:0;width:7px;height:7px;border-radius:50%;background:#90D890;box-shadow:0 0 6px #90D890"></span>
+    </div>
+  </header>
+
+  <nav class="app-nav">
+    <button class="nav-btn active" onclick="switchTab('dashboard')">Dashboard</button>
+    <button class="nav-btn" onclick="switchTab('log')">Log Transaction</button>
+    <button class="nav-btn" onclick="switchTab('budget')">Set Budget</button>
+    <button class="nav-btn" onclick="switchTab('calendar')">📅 Calendar</button>
+    <button class="nav-btn" onclick="switchTab('export')">Export &amp; Data</button>
+    <button class="nav-btn" onclick="switchTab('print')">Print Summary</button>
+    <div class="more-wrap">
+      <button class="more-btn" id="moreBtn" onclick="toggleMobileMore()">
+        More <span class="more-btn-chevron">▾</span>
+      </button>
+      <div class="more-drop" id="moreDrop">
+        <div class="more-drop-header">
+          <div class="more-drop-header-label">Additional Options</div>
+        </div>
+        <button class="more-drop-item" id="drop-categories" onclick="switchTab('categories');closeMobileMore()">
+          <span class="more-drop-item-icon">✏️</span>
+          <span class="more-drop-item-text">Edit Categories</span>
+          <span class="more-drop-item-arrow">›</span>
+        </button>
+        <button class="more-drop-item" id="drop-instructions" onclick="switchTab('instructions');closeMobileMore()">
+          <span class="more-drop-item-icon">📖</span>
+          <span class="more-drop-item-text">Instructions</span>
+          <span class="more-drop-item-arrow">›</span>
+        </button>
+        <button class="more-drop-item" id="drop-settings" onclick="switchTab('settings');closeMobileMore()">
+          <span class="more-drop-item-icon">🎨</span>
+          <span class="more-drop-item-text">Settings</span>
+          <span class="more-drop-item-arrow">›</span>
+        </button>
+        <button class="more-drop-item" id="drop-license" onclick="switchTab('license');closeMobileMore()">
+          <span class="more-drop-item-icon">©</span>
+          <span class="more-drop-item-text">License</span>
+          <span class="more-drop-item-arrow">›</span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="page">
+
+    <!-- DASHBOARD -->
+    <div id="tab-dashboard" class="tab-panel active">
+      <div class="summary-row fade-up" id="summaryRow"></div>
+      <div class="dashboard-grid fade-up-2" style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px">
+        <div class="card">
+          <div class="card-title">Cash Flow Summary</div>
+          <div class="donut-wrap">
+            <svg id="donutSvg" width="130" height="130" viewBox="0 0 120 120" style="flex-shrink:0"></svg>
+            <div id="cashFlowRows" style="flex:1;font-size:13px"></div>
+          </div>
+          <div style="margin-top:14px;display:flex;align-items:center;gap:8px">
+            <label class="field-label" style="margin:0;white-space:nowrap">Rollover $</label>
+            <input class="inp" id="rolloverInp" type="number" min="0" step="0.01" placeholder="0.00" style="width:120px;text-align:right" oninput="save();render()"/>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Budget vs Actual · <span id="bvaMthLabel"></span></div>
+          <div id="budgetBars"></div>
+        </div>
+      </div>
+      <div class="card fade-up-3">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+          <div class="card-title" style="margin:0;border:none;padding:0">Recent Transactions</div>
+          <div class="export-panel" id="dashExport"></div>
+        </div>
+        <div id="recentTbl"></div>
+      </div>
+    </div>
+
+    <!-- LOG -->
+    <div id="tab-log" class="tab-panel">
+      <div class="split-layout fade-up" style="display:grid;grid-template-columns:360px 1fr;gap:20px">
+        <div class="card">
+          <div class="card-title">Add Transaction</div>
+          <div class="form-col">
+            <div><label class="field-label">Date</label><input class="inp" id="txnDate" type="date" style="width:100%;padding:10px 13px;font-size:13px;line-height:1.2;height:auto;min-height:unset;box-sizing:border-box;-webkit-appearance:none"/></div>
+            <div><label class="field-label">Category</label><select class="inp" id="txnCat" onchange="updateTxnType()" style="font-size:13px;padding:6px 10px"></select></div>
+            <div><label class="field-label">Type</label><span id="txnTypePill"></span></div>
+            <div><label class="field-label">Amount ($)</label><input class="inp" id="txnAmt" type="number" min="0" step="0.01" placeholder="0.00"/></div>
+            <div><label class="field-label">Note (optional)</label><input class="inp" id="txnNote" type="text" placeholder="e.g. Grocery run"/></div>
+            <button class="btn btn-primary" onclick="addTransaction()">＋ Add Transaction</button>
+          </div>
+        </div>
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+            <div class="card-title" style="margin:0;border:none;padding:0" id="logTitle"></div>
+            <div class="export-panel" id="logExport"></div>
+          </div>
+          <div id="logTbl"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BUDGET -->
+    <div id="tab-budget" class="tab-panel">
+      <div class="budget-grid fade-up" id="budgetGrid"></div>
+    </div>
+
+    <!-- CALENDAR -->
+    <div id="tab-calendar" class="tab-panel">
+      <div>
+        <div class="card" style="margin-bottom:16px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+            <div style="font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:var(--plum-lt);font-weight:700" id="calTitle"></div>
+            <div style="display:flex;gap:8px">
+              <button class="btn btn-ghost btn-sm" onclick="calPrev()">← Prev</button>
+              <button class="btn btn-ghost btn-sm" onclick="calNext()">Next →</button>
+            </div>
+          </div>
+          <p style="font-size:11px;color:var(--plum-lt);margin-bottom:8px">Tap any day to add a bill due date or note. Bills you log appear automatically.</p>
+          <div class="cal-grid" id="calDayHdrs"></div>
+          <div class="cal-grid" id="calCells"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Legend</div>
+          <div style="display:flex;gap:14px;flex-wrap:wrap;font-size:12px">
+            <div style="display:flex;align-items:center;gap:6px"><span class="cal-entry cal-entry-bill" style="font-size:10px">Bill</span> Bills from log</div>
+            <div style="display:flex;align-items:center;gap:6px"><span class="cal-entry cal-entry-note" style="font-size:10px">Note</span> Custom notes</div>
+            <div style="display:flex;align-items:center;gap:6px"><div style="width:12px;height:12px;border-radius:3px;border:2px solid var(--rose-dk);background:#FFF5F8"></div> Today</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EXPORT -->
+    <div id="tab-export" class="tab-panel">
+      <div class="split-layout fade-up" style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+        <div class="card">
+          <div class="card-title">Export Your Data</div>
+          <p style="font-size:13px;color:var(--plum-mid);line-height:1.7;margin-bottom:20px">Download as CSV — opens in Excel, Google Sheets, or any spreadsheet app.</p>
+          <div class="export-card">
+            <div class="export-card-title">Monthly Transactions</div>
+            <div class="export-card-desc" id="monthExportDesc"></div>
+            <button class="btn btn-export" onclick="exportMonthCSV()">⬇ Export This Month</button>
+          </div>
+          <div class="export-card export-card-lav">
+            <div class="export-card-title" style="color:var(--lav-dk)">Full Export</div>
+            <div class="export-card-desc" id="fullExportDesc"></div>
+            <button class="btn btn-export2" onclick="exportFullCSV()">⬇ Export Everything</button>
+          </div>
+          <div class="export-card">
+            <div class="export-card-title">By Year</div>
+            <div id="yearExportBtns" style="display:flex;gap:10px;flex-wrap:wrap"></div>
+          </div>
+          <div class="export-card" style="background:var(--lav-lt);border-color:var(--lav)">
+            <div class="export-card-title" style="color:var(--lav-dk)">📥 Import from CSV</div>
+            <div class="export-card-desc">Import a full export from this app or the desktop version. Transactions are merged (no duplicates). Budgets will be updated.</div>
+            <div style="margin-bottom:12px;padding:10px 14px;background:white;border-radius:8px;border:1px solid var(--lav);font-size:11px;color:var(--plum-mid);line-height:1.6">
+              ⚠️ <strong>Merge mode:</strong> new transactions are added, existing ones kept.
+            </div>
+            <label class="btn btn-export2" style="cursor:pointer;display:inline-flex;align-items:center;gap:6px">
+              Import CSV File
+              <input type="file" accept=".csv" id="importFileInput" style="display:none" onchange="importCSV(this)"/>
+            </label>
+            <div id="importResult" style="margin-top:10px;font-size:12px;display:none;padding:10px 14px;border-radius:9px"></div>
+          </div>
+        </div>
+        <div>
+          <div class="card" style="margin-bottom:18px">
+            <div class="card-title">Storage Status</div>
+            <div id="storageStatus"></div>
+            <div style="margin-top:16px;padding:16px;background:#FEF0F0;border-radius:10px;border:1px solid var(--rose-lt)">
+              <div style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--danger);font-weight:700;margin-bottom:7px">Danger Zone</div>
+              <p style="font-size:12px;color:var(--plum-mid);line-height:1.5;margin-bottom:12px">Permanently clears all data. Export first!</p>
+              <button class="btn btn-danger" onclick="clearAll()">Clear All Data</button>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">About Auto-Save</div>
+            <ul style="font-size:13px;color:var(--plum-mid);line-height:1.9;padding-left:16px">
+              <li>✓ Saves every change automatically</li>
+              <li>✓ Works offline after first load</li>
+              <li>✓ Persists when you close &amp; reopen</li>
+              <li>✗ Device/browser only — export regularly!</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PRINT -->
+    <div id="tab-print" class="tab-panel">
+      <div class="card fade-up" style="max-width:720px;margin:0 auto">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+          <div>
+            <div style="font-family:'Playfair Display',serif;font-size:22px;font-style:italic;color:var(--plum)">Monthly Summary</div>
+            <div id="printSubtitle" style="font-size:11px;color:var(--plum-lt);letter-spacing:.1em;margin-top:2px"></div>
+          </div>
+          <button class="btn btn-primary" onclick="window.print()">🖨 Print / Save PDF</button>
+        </div>
+        <div id="printContent"></div>
+      </div>
+    </div>
+
+
+
+    <!-- INSTRUCTIONS -->
+    <div id="tab-instructions" class="tab-panel">
+      <div style="max-width:680px;margin:0 auto">
+
+        <div class="card" style="margin-bottom:16px;border-top:4px solid var(--rose-dk);text-align:center;padding:24px">
+          <div style="font-size:36px;margin-bottom:8px">📖</div>
+          <div style="font-family:'Playfair Display',serif;font-size:24px;font-style:italic;color:var(--plum)">How to Use Bloom Budget</div>
+          <div style="font-size:11px;color:var(--plum-lt);margin-top:4px">Mobile Version · Hustle&amp;Handoff</div>
+        </div>
+
+        <div class="card" style="margin-bottom:14px">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+            <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--rose-dk),var(--lav-dk));display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:16px;font-style:italic;color:white;flex-shrink:0">1</div>
+            <div style="font-family:'Playfair Display',serif;font-size:17px;font-style:italic;color:var(--plum)">Log a Transaction</div>
+          </div>
+          <p style="font-size:13px;color:var(--plum-mid);line-height:1.7;margin-bottom:10px">Tap <strong>Log Transaction</strong> in the top nav. Pick a date, choose a category, enter the amount, and add an optional note. Tap <strong>＋ Add Transaction</strong>.</p>
+          <p style="font-size:11px;color:var(--plum-lt)">💡 Your dashboard updates automatically after each entry.</p>
+        </div>
+
+        <div class="card" style="margin-bottom:14px">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+            <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--rose-dk),var(--lav-dk));display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:16px;font-style:italic;color:white;flex-shrink:0">2</div>
+            <div style="font-family:'Playfair Display',serif;font-size:17px;font-style:italic;color:var(--plum)">Set a Monthly Budget</div>
+          </div>
+          <p style="font-size:13px;color:var(--plum-mid);line-height:1.7;margin-bottom:10px">Tap <strong>Set Budget</strong> and enter a spending target for each category. These appear as progress bars on your dashboard so you can see how close you are.</p>
+          <p style="font-size:11px;color:var(--plum-lt)">💡 Budget amounts stay saved until you change them.</p>
+        </div>
+
+        <div class="card" style="margin-bottom:14px">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+            <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--rose-dk),var(--lav-dk));display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:16px;font-style:italic;color:white;flex-shrink:0">3</div>
+            <div style="font-family:'Playfair Display',serif;font-size:17px;font-style:italic;color:var(--plum)">Use the Bill Calendar</div>
+          </div>
+          <p style="font-size:13px;color:var(--plum-mid);line-height:1.7;margin-bottom:10px">Tap <strong>📅 Calendar</strong> to see bills on a monthly grid. Bills you log appear automatically. Tap any day to add a custom note or reminder.</p>
+          <p style="font-size:11px;color:var(--plum-lt)">💡 Use Prev / Next to navigate months. Today is highlighted in pink.</p>
+        </div>
+
+        <div class="card" style="margin-bottom:14px;border:2px solid var(--lav)">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+            <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--rose-dk),var(--lav-dk));display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:16px;font-style:italic;color:white;flex-shrink:0">4</div>
+            <div style="font-family:'Playfair Display',serif;font-size:17px;font-style:italic;color:var(--plum)">Sync with Desktop</div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:10px">
+            <div style="padding:12px 14px;background:var(--lav-lt);border-radius:10px;font-size:12px;color:var(--plum-mid);line-height:1.6"><strong>📱 Mobile → Desktop:</strong> <em>Export &amp; Data</em> → <em>⬇ Export Everything</em> → transfer CSV to your computer → open desktop version → <em>Export &amp; Data</em> → <em>📥 Import CSV</em>.</div>
+            <div style="padding:12px 14px;background:var(--lav-lt);border-radius:10px;font-size:12px;color:var(--plum-mid);line-height:1.6"><strong>💻 Desktop → Mobile:</strong> Export from desktop → email/AirDrop/Drive the CSV to your phone → open this app → <em>Export &amp; Data</em> → <em>📥 Import CSV</em>.</div>
+          </div>
+          <p style="font-size:11px;color:var(--plum-lt)">💡 Transactions merge with no duplicates. Export regularly as a backup.</p>
+        </div>
+
+        <div class="card" style="margin-bottom:14px">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+            <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--rose-dk),var(--lav-dk));display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:16px;font-style:italic;color:white;flex-shrink:0">5</div>
+            <div style="font-family:'Playfair Display',serif;font-size:17px;font-style:italic;color:var(--plum)">Back Up Your Data</div>
+          </div>
+          <p style="font-size:13px;color:var(--plum-mid);line-height:1.7">Your data saves automatically in your browser, but clearing browser data will erase it. Export a backup CSV at least once a month via <strong>Export &amp; Data → ⬇ Export Everything</strong>.</p>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Quick Tips</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="padding:10px 14px;background:var(--cream);border-radius:9px;font-size:12px;color:var(--plum-mid);border-left:3px solid var(--rose-dk)">💾 <strong>Auto-saves</strong> — every change saves instantly. No save button needed.</div>
+            <div style="padding:10px 14px;background:var(--cream);border-radius:9px;font-size:12px;color:var(--plum-mid);border-left:3px solid var(--rose-dk)">📅 <strong>Past months</strong> — use the month &amp; year dropdowns in the header to review old months.</div>
+            <div style="padding:10px 14px;background:var(--cream);border-radius:9px;font-size:12px;color:var(--plum-mid);border-left:3px solid var(--rose-dk)">✈️ <strong>Works offline</strong> — after opening once, no internet connection needed.</div>
+            <div style="padding:10px 14px;background:var(--cream);border-radius:9px;font-size:12px;color:var(--plum-mid);border-left:3px solid var(--rose-dk)">🖨️ <strong>Print summary</strong> — tap Print Summary for a clean monthly overview to print or save as PDF.</div>
+          </div>
+          <div style="margin-top:14px;padding:12px;background:var(--lav-lt);border-radius:10px;text-align:center;border:1px solid var(--lav)">
+            <div style="font-size:12px;color:var(--plum-mid)">Need help? Message <strong>Hustle&amp;Handoff</strong> on Etsy ❖</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- LICENSE -->
+    <div id="tab-license" class="tab-panel">
+      <div style="max-width:680px;margin:0 auto">
+
+        <div class="card" style="margin-bottom:14px;border-top:4px solid var(--rose-dk)">
+          <div style="text-align:center;padding:10px 0 20px">
+            <div style="font-family:'Playfair Display',serif;font-size:30px;font-style:italic;color:var(--rose-dk)">Bloom Budget</div>
+            <div style="font-size:11px;color:var(--plum-lt);letter-spacing:.15em;text-transform:uppercase;margin-top:3px">Mobile Planner</div>
+          </div>
+          <div style="background:linear-gradient(135deg,var(--blush),var(--lav-lt));border-radius:12px;padding:16px 18px;margin-bottom:16px;text-align:center">
+            <div style="font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--plum-mid);font-weight:700;margin-bottom:4px">© 2026 Hustle&amp;Handoff</div>
+            <div style="font-family:'Playfair Display',serif;font-size:20px;font-style:italic;color:var(--plum)">Personal Use License</div>
+            <div style="font-size:11px;color:var(--plum-lt);margin-top:5px">Thank you for supporting an independent creator ❖</div>
+          </div>
+
+          <div style="font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--plum-lt);font-weight:700;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--rose-lt)">What You Can Do</div>
+          <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:18px">
+            <div style="display:flex;gap:10px;padding:10px 13px;background:#EDF5E8;border-radius:9px;border-left:3px solid var(--sage-dk);font-size:12px;color:var(--plum-mid)"><span style="flex-shrink:0">✓</span><div><strong style="color:var(--sage-dk)">Use it for yourself</strong> — track your personal or household budget indefinitely.</div></div>
+            <div style="display:flex;gap:10px;padding:10px 13px;background:#EDF5E8;border-radius:9px;border-left:3px solid var(--sage-dk);font-size:12px;color:var(--plum-mid)"><span style="flex-shrink:0">✓</span><div><strong style="color:var(--sage-dk)">Use on all your own devices</strong> — install on your iPhone, iPad, Android phone, or family tablet — anything you personally own.</div></div>
+            <div style="display:flex;gap:10px;padding:10px 13px;background:#EDF5E8;border-radius:9px;border-left:3px solid var(--sage-dk);font-size:12px;color:var(--plum-mid)"><span style="flex-shrink:0">✓</span><div><strong style="color:var(--sage-dk)">Customise it</strong> — rename categories, change themes, set your planner name. Make it yours.</div></div>
+            <div style="display:flex;gap:10px;padding:10px 13px;background:#EDF5E8;border-radius:9px;border-left:3px solid var(--sage-dk);font-size:12px;color:var(--plum-mid)"><span style="flex-shrink:0">✓</span><div><strong style="color:var(--sage-dk)">Export your data</strong> — back up your transactions as CSV anytime. Your data is yours.</div></div>
+          </div>
+
+          <div style="font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--plum-lt);font-weight:700;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--rose-lt)">What You Cannot Do</div>
+          <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:18px">
+            <div style="display:flex;gap:10px;padding:10px 13px;background:#F8E8EA;border-radius:9px;border-left:3px solid var(--danger);font-size:12px;color:var(--plum-mid)"><span style="flex-shrink:0">✗</span><div><strong style="color:var(--danger)">Share your planner link publicly</strong> — your access link is for your personal household use only. Don’t post it online, share on social media, or send to friends.</div></div>
+            <div style="display:flex;gap:10px;padding:10px 13px;background:#F8E8EA;border-radius:9px;border-left:3px solid var(--danger);font-size:12px;color:var(--plum-mid)"><span style="flex-shrink:0">✗</span><div><strong style="color:var(--danger)">Resell or redistribute</strong> — you may not sell, gift, or distribute the planner or its files to anyone else.</div></div>
+            <div style="display:flex;gap:10px;padding:10px 13px;background:#F8E8EA;border-radius:9px;border-left:3px solid var(--danger);font-size:12px;color:var(--plum-mid)"><span style="flex-shrink:0">✗</span><div><strong style="color:var(--danger)">Claim it as your own</strong> — you may not upload, list, or present this planner as your own creation anywhere.</div></div>
+            <div style="display:flex;gap:10px;padding:10px 13px;background:#F8E8EA;border-radius:9px;border-left:3px solid var(--danger);font-size:12px;color:var(--plum-mid)"><span style="flex-shrink:0">✗</span><div><strong style="color:var(--danger)">Commercial use</strong> — the planner may not be used as part of any paid service, business product, or client deliverable.</div></div>
+            <div style="display:flex;gap:10px;padding:10px 13px;background:#F8E8EA;border-radius:9px;border-left:3px solid var(--danger);font-size:12px;color:var(--plum-mid)"><span style="flex-shrink:0">✗</span><div><strong style="color:var(--danger)">Upload to other marketplaces</strong> — listing on Etsy, Gumroad, Creative Market, or anywhere else is prohibited.</div></div>
+          </div>
+
+          <div style="background:var(--lav-lt);border-radius:10px;padding:14px 16px;text-align:center;border:1px solid var(--lav)">
+            <div style="font-size:11px;color:var(--plum-mid);line-height:1.7">Purchased from <strong>Hustle&amp;Handoff on Etsy</strong>? You’re all good — enjoy your planner! ❖<br/><br/>If a friend shared their link with you, please support the creator by purchasing a legitimate copy. Friends who buy their own copy get their own setup help and lifetime access through Etsy.</div>
+            <div style="font-size:10px;color:var(--plum-lt);margin-top:10px;letter-spacing:.08em">© 2026 HUSTLE&amp;HANDOFF · ALL RIGHTS RESERVED</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Product Information</div>
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <div style="display:flex;justify-content:space-between;font-size:12px;padding:7px 0;border-bottom:1px dotted var(--rose-lt)"><span style="color:var(--plum-mid)">Product</span><span style="font-weight:600">Bloom Budget Mobile Planner</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:12px;padding:7px 0;border-bottom:1px dotted var(--rose-lt)"><span style="color:var(--plum-mid)">Creator</span><span style="font-weight:600">Hustle&amp;Handoff</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:12px;padding:7px 0;border-bottom:1px dotted var(--rose-lt)"><span style="color:var(--plum-mid)">Version</span><span style="font-weight:600">2.0 · 2026</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:12px;padding:7px 0;border-bottom:1px dotted var(--rose-lt)"><span style="color:var(--plum-mid)">License</span><span style="font-weight:600">Personal Use Only</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:12px;padding:7px 0"><span style="color:var(--plum-mid)">Support</span><span style="font-weight:600">Message Hustle&amp;Handoff on Etsy</span></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div id="tab-settings" class="tab-panel">
+      <div style="max-width:600px;margin:0 auto">
+
+        <!-- Name -->
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-title">Planner Name</div>
+          <p style="font-size:12px;color:var(--plum-mid);line-height:1.6;margin-bottom:12px">Shown on the welcome screen and header.</p>
+          <div style="margin-bottom:12px">
+            <label class="field-label">Planner Name</label>
+            <input class="inp" id="settingName" type="text" placeholder="Bloom Budget"
+              oninput="applyMobileSettings()"/>
+          </div>
+          <div style="padding:14px;background:linear-gradient(135deg,var(--blush),var(--lav-lt));border-radius:10px;text-align:center">
+            <div id="previewName" style="font-family:'Playfair Display',serif;font-size:20px;font-style:italic;color:var(--rose-dk)">Bloom Budget</div>
+            <div style="font-size:10px;color:var(--plum-lt);letter-spacing:.15em;text-transform:uppercase;margin-top:3px">Preview</div>
+          </div>
+        </div>
+
+        <!-- Colour themes -->
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-title">Colour Theme</div>
+          <p style="font-size:12px;color:var(--plum-mid);line-height:1.6;margin-bottom:12px">Changes the header, buttons, and accent colours.</p>
+          <div id="mobileSwatches" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px"></div>
+          <div style="display:flex;gap:12px;align-items:center">
+            <div>
+              <label class="field-label">Colour A</label>
+              <input type="color" id="mColorA" value="#A66880"
+                oninput="applyMobileColor()"
+                style="width:48px;height:36px;border-radius:8px;border:1.5px solid var(--rose-lt);cursor:pointer;padding:2px"/>
+            </div>
+            <div>
+              <label class="field-label">Colour B</label>
+              <input type="color" id="mColorB" value="#8070B0"
+                oninput="applyMobileColor()"
+                style="width:48px;height:36px;border-radius:8px;border:1.5px solid var(--rose-lt);cursor:pointer;padding:2px"/>
+            </div>
+            <div style="flex:1">
+              <label class="field-label">Preview</label>
+              <div id="mColorPreview" style="height:36px;border-radius:8px;background:linear-gradient(135deg,#A66880,#8070B0)"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Currency -->
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-title">Currency Symbol</div>
+          <div id="mobileCurrencyBtns" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px"></div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <label class="field-label" style="margin:0;white-space:nowrap">Custom</label>
+            <input class="inp" id="mCustomCurrency" type="text" maxlength="4"
+              placeholder="e.g. ₹" style="width:80px"
+              oninput="state.settings.currency=this.value||'$';save();render()"/>
+          </div>
+        </div>
+
+        <!-- Reset -->
+        <div class="card">
+          <div class="card-title">Reset Settings</div>
+          <p style="font-size:12px;color:var(--plum-mid);line-height:1.6;margin-bottom:12px">Restore name and colours to defaults.</p>
+          <button class="btn btn-ghost" onclick="resetMobileSettings()">↩ Reset to Defaults</button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- EDIT CATEGORIES -->
+    <div id="tab-categories" class="tab-panel">
+      <div style="max-width:600px;margin:0 auto">
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-title">Edit Category Names</div>
+          <p style="font-size:12px;color:var(--plum-mid);line-height:1.6;margin-bottom:14px">
+            Tap any category name below to rename it. Changes apply everywhere — your dashboard, log dropdown, budget, and calendar all update instantly.
+          </p>
+          <div id="catEditorContent"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Reset to Defaults</div>
+          <p style="font-size:12px;color:var(--plum-mid);line-height:1.6;margin-bottom:12px">
+            Restore all category names back to their originals. Your transactions are not affected.
+          </p>
+          <button class="btn btn-ghost" onclick="resetMobileCategories()">↩ Reset Category Names</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /page -->
+
+  <footer class="app-footer">
+    <div class="footer-logo">❖ Bloom Budget Planner</div>
+    <div>Made with love · Your data stays private on your device</div>
+  </footer>
+</div><!-- /app -->
+
+<script>
+// ════════════════════════════════════════════════════════════════
+//  DATA & CONSTANTS
+// ════════════════════════════════════════════════════════════════
+const DEFAULT_INCOME  = ["Paycheck","Business","Side Hustle","Interest Income","Dividends"];
+let INCOME_CATS  = [...DEFAULT_INCOME];
+const DEFAULT_BILLS   = ["Internet","Water","Electricity","Mobile","Gym","Health Insurance","Rent","Gas","Spotify","Netflix"];
+let BILL_CATS    = [...DEFAULT_BILLS];
+const DEFAULT_EXPENSES = ["Food","Dining Out","Transportation","Household","Education","Health","Beauty","Gifts","Self-development","Entertainment"];
+let EXPENSE_CATS = [...DEFAULT_EXPENSES];
+const DEFAULT_SAVINGS = ["Car","Travel","Renovation","Emergency Fund"];
+let SAVINGS_CATS = [...DEFAULT_SAVINGS];
+const DEFAULT_DEBT    = ["Student Loan","Credit Card"];
+let DEBT_CATS    = [...DEFAULT_DEBT];
+function getAllCats() { return [...INCOME_CATS,...BILL_CATS,...EXPENSE_CATS,...SAVINGS_CATS,...DEBT_CATS]; }
+let ALL_CATS = getAllCats();
+const MONTHS       = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+const NOW          = new Date();
+
+// ── State (loaded from localStorage) ─────────────────────────
+let state = {
+  transactions:  [],
+  budgets:       {},
+  rollover:      0,
+  settings:      { name:'Bloom Budget', colorA:'#A66880', colorB:'#8070B0', currency:'$' },
+  catNames:      null,
+  selectedMonth: NOW.getMonth(),
+  selectedYear:  NOW.getFullYear(),
+  calEntries:    {},
+  calViewMonth:  NOW.getMonth(),
+  calViewYear:   NOW.getFullYear(),
+};
+
+function loadState() {
+  try {
+    const s = localStorage.getItem("bloom_mobile_v3");
+    if (s) { Object.assign(state, JSON.parse(s)); if(!state.calEntries) state.calEntries={}; if(state.calViewMonth===undefined) state.calViewMonth=NOW.getMonth(); if(state.calViewYear===undefined) state.calViewYear=NOW.getFullYear();
+      if(state.catNames){
+        if(state.catNames.income)   INCOME_CATS  = [...state.catNames.income];
+        if(state.catNames.bills)    BILL_CATS    = [...state.catNames.bills];
+        if(state.catNames.expenses) EXPENSE_CATS = [...state.catNames.expenses];
+        if(state.catNames.savings)  SAVINGS_CATS = [...state.catNames.savings];
+        if(state.catNames.debt)     DEBT_CATS    = [...state.catNames.debt];
+        ALL_CATS = getAllCats();
+      } if(!state.settings) state.settings={name:'Bloom Budget',colorA:'#A66880',colorB:'#8070B0',currency:'$'}; }
+  } catch(e) {}
+}
+
+let saveTimer;
+function save() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    try { localStorage.setItem("bloom_mobile_v3", JSON.stringify(state)); } catch(e) {}
+    flashSaved();
+  }, 300);
+}
+
+function flashSaved() {
+  const dot = document.getElementById('saveDot2');
+  if (dot) { dot.style.opacity='1'; clearTimeout(flashSaved._t); flashSaved._t = setTimeout(()=>{ dot.style.opacity='0'; }, 2000); }
+}
+
+// ── Helpers ───────────────────────────────────────────────────
+function getCatType(cat) {
+  if (INCOME_CATS.includes(cat))  return "Income";
+  if (BILL_CATS.includes(cat))    return "Bills";
+  if (EXPENSE_CATS.includes(cat)) return "Expenses";
+  if (SAVINGS_CATS.includes(cat)) return "Savings";
+  if (DEBT_CATS.includes(cat))    return "Debt";
+  return "Expenses";
+}
+
+function fmt(n) { return Math.abs(n).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function fmtDate(d) { return new Date(d+"T12:00:00").toLocaleDateString("en-US",{month:"short",day:"numeric"}); }
+
+function pillHtml(type) {
+  const cls = {Income:"pill-income",Bills:"pill-bills",Expenses:"pill-expenses",Savings:"pill-savings",Debt:"pill-debt"}[type]||"pill-expenses";
+  return `<span class="pill ${cls}">${type}</span>`;
+}
+
+function monthTxns() {
+  return state.transactions.filter(t => {
+    const d = new Date(t.date+"T12:00:00");
+    return d.getMonth()===state.selectedMonth && d.getFullYear()===state.selectedYear;
+  });
+}
+
+function totals() {
+  const r = {Income:0,Bills:0,Expenses:0,Savings:0,Debt:0};
+  monthTxns().forEach(t => r[t.type] = (r[t.type]||0)+t.amount);
+  return r;
+}
+
+function budgetTotals() {
+  const r = {Income:0,Bills:0,Expenses:0,Savings:0,Debt:0};
+  ALL_CATS.forEach(c => { if(state.budgets[c]){ const tp=getCatType(c); r[tp]=(r[tp]||0)+state.budgets[c]; }});
+  return r;
+}
+
+function catActuals() {
+  const r={};
+  monthTxns().forEach(t => r[t.category]=(r[t.category]||0)+t.amount);
+  return r;
+}
+
+
+
+// ════════════════════════════════════════════════════════════════
+//  INIT
+// ════════════════════════════════════════════════════════════════
+function startApp() {
+  document.getElementById("welcome").classList.add("hidden");
+  setTimeout(() => {
+    document.getElementById("welcome").style.display = "none";
+    const app = document.getElementById("app");
+    app.classList.add("visible");
+  }, 620);
+}
+
+function init() {
+  loadState();
+  if(state.settings) applyMobileTheme(state.settings.colorA||'#A66880', state.settings.colorB||'#8070B0');
+  buildPetals();
+  buildMonthYearSelects();
+  buildCategorySelect();
+  render();
+}
+
+function buildPetals() {
+  const wrap = document.getElementById("petals");
+  const colors = ["#E8C8D4","#C4B5E8","#C8D8C0","#EED8C8","#C0D4EE"];
+  for(let i=0;i<18;i++){
+    const el = document.createElement("div");
+    el.className = "petal";
+    el.style.cssText = `
+      left:${Math.random()*100}%;top:${Math.random()*100}%;
+      background:${colors[i%colors.length]};
+      animation-delay:${Math.random()*4}s;
+      animation-duration:${3+Math.random()*3}s;
+      width:${6+Math.random()*8}px;height:${6+Math.random()*8}px;
+    `;
+    wrap.appendChild(el);
+  }
+}
+
+function buildMonthYearSelects() {
+  const mSel = document.getElementById("monthSel");
+  MONTHS.forEach((m,i)=>{
+    const o=document.createElement("option"); o.value=i; o.textContent=m;
+    if(i===state.selectedMonth) o.selected=true;
+    mSel.appendChild(o);
+  });
+  const ySel = document.getElementById("yearSel");
+  [NOW.getFullYear()-1, NOW.getFullYear(), NOW.getFullYear()+1].forEach(y=>{
+    const o=document.createElement("option"); o.value=y; o.textContent=y;
+    if(y===state.selectedYear) o.selected=true;
+    ySel.appendChild(o);
+  });
+}
+
+function buildCategorySelect() {
+  const sel = document.getElementById("txnCat");
+  [["── Income ──",INCOME_CATS],["── Bills ──",BILL_CATS],["── Expenses ──",EXPENSE_CATS],["── Savings ──",SAVINGS_CATS],["── Debt ──",DEBT_CATS]].forEach(([g,cats])=>{
+    const og=document.createElement("optgroup"); og.label=g;
+    cats.forEach(c=>{const o=document.createElement("option");o.value=c;o.textContent=c;og.appendChild(o);});
+    sel.appendChild(og);
+  });
+  sel.value = "Food";
+  updateTxnType();
+  // Set today's date
+  document.getElementById("txnDate").value = NOW.toISOString().split("T")[0];
+}
+
+function onMonthChange() {
+  state.selectedMonth = parseInt(document.getElementById("monthSel").value);
+  save(); render();
+}
+function onYearChange() {
+  state.selectedYear = parseInt(document.getElementById("yearSel").value);
+  save(); render();
+}
+
+// ════════════════════════════════════════════════════════════════
+//  RENDER
+// ════════════════════════════════════════════════════════════════
+function cur() { return (state.settings && state.settings.currency) || '$'; }
+
+function render() {
+  const T  = totals();
+  const BT = budgetTotals();
+  const MT = monthTxns();
+  const CA = catActuals();
+  const rollover = parseFloat(document.getElementById("rolloverInp")?.value)||state.rollover||0;
+  state.rollover = rollover;
+
+  const income = T.Income + rollover;
+  const spent  = T.Bills + T.Expenses + T.Savings + T.Debt;
+  const left   = income - spent;
+  const mLabel = `${MONTHS[state.selectedMonth]} ${state.selectedYear}`;
+
+  // ── Summary cards ──────────────────────────────────────────
+  const summaryRow = document.getElementById("summaryRow");
+  if(summaryRow) summaryRow.innerHTML = [
+    {label:"Total Income",  val:income,     bg:"#EDF5E8", accent:"var(--sage-dk)", sub:`${MT.filter(t=>t.type==="Income").length} transactions`},
+    {label:"Total Spent",   val:spent,      bg:"var(--lav-lt)", accent:"var(--lav-dk)", sub:`Bills + Expenses`},
+    {label:"Savings",       val:T.Savings,  bg:"#E0EDF8", accent:"#407098", sub:`${MT.filter(t=>t.type==="Savings").length} transfers`},
+    {label:"Total", val:left,       bg:left>=0?"#E8F5E8":"#F8E8EA", accent:left>=0?"var(--sage-dk)":"var(--danger)", sub:left>=0?"looking good ✦":"over budget"},
+  ].map(c=>`
+    <div class="summary-card" style="background:${c.bg};border-left-color:${c.accent}">
+      <div class="summary-card-label">${c.label}</div>
+      <div class="summary-card-amount" style="color:${c.label==="Total"&&left<0?"var(--danger)":"var(--plum)"}">
+        $${fmt(c.val)}
+      </div>
+      <div class="summary-card-sub">${c.sub}</div>
+    </div>
+  `).join("");
+
+  // ── Donut ──────────────────────────────────────────────────
+  const donutSvg = document.getElementById("donutSvg");
+  if(donutSvg) {
+    const segments = [
+      {v:T.Bills,    c:"#E8A860"},{v:T.Expenses,c:"var(--lav)"},
+      {v:T.Savings,  c:"var(--sky)"},{v:T.Debt,c:"var(--rose)"},
+      {v:Math.max(0,left),c:"var(--sage)"},
+    ].filter(s=>s.v>0);
+    const total = income||1;
+    const r=46,cx=60,cy=60,sw=16, circ=2*Math.PI*r;
+    let offset=0;
+    let paths = `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--rose-lt)" stroke-width="${sw}"/>`;
+    segments.forEach(s=>{
+      const dash=(s.v/total)*circ;
+      paths+=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${s.c}" stroke-width="${sw}"
+        stroke-dasharray="${dash} ${circ-dash}" stroke-dashoffset="${circ/4-offset}" style="transition:all .6s"/>`;
+      offset+=dash;
+    });
+    paths += `
+      <text x="${cx}" y="${cy-3}" text-anchor="middle" fill="var(--plum)" font-size="10" font-family="Playfair Display,serif" font-style="italic">total</text>
+      <text x="${cx}" y="${cy+12}" text-anchor="middle" fill="var(--plum)" font-size="12" font-family="DM Sans,sans-serif" font-weight="600">$${income>0?Math.round(income).toLocaleString():0}</text>
+    `;
+    donutSvg.innerHTML = paths;
+  }
+
+  // ── Cash flow rows ─────────────────────────────────────────
+  const cfRows = document.getElementById("cashFlowRows");
+  if(cfRows) cfRows.innerHTML = [
+    {label:"+ Rollover", val:rollover,  color:"var(--plum-lt)"},
+    {label:"+ Income",   val:T.Income,  color:"var(--sage-dk)"},
+    {label:"− Bills",    val:T.Bills,   color:"#E8A860"},
+    {label:"− Expenses", val:T.Expenses,color:"var(--lav-dk)"},
+    {label:"− Savings",  val:T.Savings, color:"#407098"},
+    {label:"− Debt",     val:T.Debt,    color:"var(--danger)"},
+  ].map(r=>`
+    <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+      <span style="color:var(--plum-mid)">${r.label}</span>
+      <span style="color:${r.color};font-weight:600">${cur()}${fmt(r.val)}</span>
+    </div>
+  `).join("")+`
+    <div style="display:flex;justify-content:space-between;padding-top:8px;border-top:1px solid var(--rose-lt);font-weight:700">
+      <span>Total</span>
+      <span style="color:${left>=0?"var(--sage-dk)":"var(--danger)"}">${cur()}${fmt(left)}</span>
+    </div>`;
+
+  // ── Budget bars ────────────────────────────────────────────
+  const bbEl = document.getElementById("budgetBars");
+  const bvaLabel = document.getElementById("bvaMthLabel");
+  if(bvaLabel) bvaLabel.textContent = mLabel;
+  if(bbEl) bbEl.innerHTML = [
+    {label:"Bills",   actual:T.Bills,   budget:BT.Bills,   color:"#E8A860"},
+    {label:"Expenses",actual:T.Expenses,budget:BT.Expenses,color:"var(--lav)"},
+    {label:"Savings", actual:T.Savings, budget:BT.Savings, color:"var(--sky)"},
+    {label:"Debt",    actual:T.Debt,    budget:BT.Debt,    color:"var(--rose)"},
+  ].map(b=>{
+    const pct = b.budget>0?Math.min((b.actual/b.budget)*100,100):0;
+    const over = b.budget>0&&b.actual>b.budget;
+    return `<div class="mini-bar-wrap">
+      <div class="mini-bar-labels">
+        <span class="mini-bar-label">${b.label}</span>
+        <span class="mini-bar-val" style="color:${over?"var(--danger)":"var(--plum-lt)"}">
+          $${fmt(b.actual)}${b.budget>0?` <span style="color:var(--plum-lt)">/ $${fmt(b.budget)}</span>`:""}
+        </span>
+      </div>
+      <div class="mini-bar-track">
+        <div class="mini-bar-fill" style="width:${pct}%;background:${over?"var(--danger)":b.color}"></div>
+      </div>
+    </div>`;
+  }).join("");
+
+  // ── Export panels ──────────────────────────────────────────
+  const expHtml = `
+    <button class="btn btn-export" onclick="exportMonthCSV()" style="font-size:11px;padding:8px 14px">⬇ ${MONTHS[state.selectedMonth]} CSV</button>
+    <button class="btn btn-export2" onclick="exportFullCSV()" style="font-size:11px;padding:8px 14px">⬇ Full Export</button>`;
+  ["dashExport","logExport"].forEach(id=>{ const el=document.getElementById(id); if(el) el.innerHTML=expHtml; });
+
+  // ── Recent transactions table ──────────────────────────────
+  const recentTbl = document.getElementById("recentTbl");
+  if(recentTbl) {
+    if(MT.length===0) {
+      recentTbl.innerHTML = `<div style="text-align:center;padding:36px;color:var(--plum-lt);font-style:italic">No transactions yet this month — add one to get started ✦</div>`;
+    } else {
+      const cols = "1fr 1.5fr 1fr 1fr 1.5fr";
+      recentTbl.innerHTML = `
+        <div class="tbl">
+          <div class="tbl-head" style="grid-template-columns:${cols}">
+            <div>Date</div><div>Category</div><div>Type</div><div style="text-align:right">Amount</div><div style="padding-left:10px">Note</div>
+          </div>
+          ${[...MT].reverse().slice(0,10).map((t,i)=>`
+            <div class="tbl-row" style="grid-template-columns:${cols}">
+              <div style="color:var(--plum-lt)">${fmtDate(t.date)}</div>
+              <div style="font-weight:600">${t.category}</div>
+              <div>${pillHtml(t.type)}</div>
+              <div style="text-align:right;font-weight:600;color:${t.type==="Income"?"var(--sage-dk)":"var(--plum)"}">${t.type==="Income"?"+":"−"}$${fmt(t.amount)}</div>
+              <div style="padding-left:10px;color:var(--plum-lt);font-style:italic">${t.note||""}</div>
+            </div>`).join("")}
+        </div>`;
+    }
+  }
+
+  // ── Log table ──────────────────────────────────────────────
+  const logTitle = document.getElementById("logTitle");
+  if(logTitle) logTitle.textContent = `All Transactions · ${mLabel}`;
+  const logTbl = document.getElementById("logTbl");
+  if(logTbl) {
+    if(MT.length===0) {
+      logTbl.innerHTML = `<div style="text-align:center;padding:40px;color:var(--plum-lt);font-style:italic">No transactions yet — add one ✦</div>`;
+    } else {
+      const cols = "1fr 1.5fr 1fr 1fr 1.5fr 36px";
+      logTbl.innerHTML = `
+        <div class="tbl">
+          <div class="tbl-head" style="grid-template-columns:${cols}">
+            <div>Date</div><div>Category</div><div>Type</div><div style="text-align:right">Amount</div><div style="padding-left:10px">Note</div><div></div>
+          </div>
+          ${[...MT].reverse().map((t,i)=>`
+            <div class="tbl-row" style="grid-template-columns:${cols}">
+              <div style="color:var(--plum-lt)">${fmtDate(t.date)}</div>
+              <div style="font-weight:600">${t.category}</div>
+              <div>${pillHtml(t.type)}</div>
+              <div style="text-align:right;font-weight:600;color:${t.type==="Income"?"var(--sage-dk)":"var(--plum)"}">${t.type==="Income"?"+":"−"}$${fmt(t.amount)}</div>
+              <div style="padding-left:10px;color:var(--plum-lt);font-style:italic">${t.note||""}</div>
+              <button class="del-btn" onclick="deleteTransaction(${t.id})">✕</button>
+            </div>`).join("")}
+          <div class="tbl-foot" style="grid-template-columns:${cols}">
+            <div style="grid-column:1/4;color:var(--plum-mid)">Net This Month</div>
+            <div style="text-align:right;color:${left>=0?"var(--sage-dk)":"var(--danger)"}">${cur()}${fmt(left)}</div>
+            <div></div><div></div>
+          </div>
+        </div>`;
+    }
+  }
+
+  // ── Budget grid ────────────────────────────────────────────
+  const bg = document.getElementById("budgetGrid");
+  if(bg) {
+    const sections = [
+      {title:"Income",  cats:INCOME_CATS,  accent:"var(--sage-dk)", bg:"#EDF5E8"},
+      {title:"Bills",   cats:BILL_CATS,    accent:"#906030",        bg:"#F8EFE4"},
+      {title:"Expenses",cats:EXPENSE_CATS, accent:"var(--lav-dk)",  bg:"var(--lav-lt)"},
+      {title:"Savings", cats:SAVINGS_CATS, accent:"#407098",        bg:"#E4EEF8"},
+      {title:"Debt",    cats:DEBT_CATS,    accent:"var(--danger)",  bg:"#F8E8EA"},
+    ];
+    bg.innerHTML = sections.map(s=>`
+      <div class="card" style="border-top:3px solid ${s.accent}">
+        <div class="card-title">${s.title} Budget</div>
+        ${s.cats.map(cat=>`
+          <div class="budget-row">
+            <label class="budget-cat">${cat}</label>
+            <div style="display:flex;align-items:center;gap:6px">
+              <span style="color:var(--plum-lt);font-size:13px">$</span>
+              <input class="inp inp-sm" type="number" min="0" placeholder="0"
+                value="${state.budgets[cat]||""}"
+                onchange="state.budgets['${cat}']=parseFloat(this.value)||0;save();render()"/>
+            </div>
+          </div>`).join("")}
+        <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--rose-lt);display:flex;justify-content:space-between;font-size:13px;font-weight:700;color:${s.accent}">
+          <span>Budgeted</span>
+          <span>$${fmt(s.cats.reduce((acc,c)=>acc+(state.budgets[c]||0),0))}</span>
+        </div>
+        <div style="margin-top:6px;display:flex;justify-content:space-between;font-size:12px;color:var(--plum-lt)">
+          <span>Actual (${MONTHS[state.selectedMonth]})</span>
+          <span>$${fmt(s.cats.reduce((acc,c)=>acc+(CA[c]||0),0))}</span>
+        </div>
+      </div>`).join("");
+  }
+
+  // ── Export tab ─────────────────────────────────────────────
+  const med = document.getElementById("monthExportDesc");
+  if(med) med.textContent=`Exports ${MT.length} transactions for ${mLabel}. Columns: Date, Category, Type, Amount, Note.`;
+  const fed = document.getElementById("fullExportDesc");
+  if(fed) fed.textContent=`Exports all ${state.transactions.length} transactions across all months, plus ${Object.keys(state.budgets).filter(k=>state.budgets[k]>0).length} budget settings.`;
+
+  const yeb = document.getElementById("yearExportBtns");
+  if(yeb) {
+    const years = [...new Set(state.transactions.map(t=>new Date(t.date+"T12:00:00").getFullYear()))].sort();
+    yeb.innerHTML = years.length===0
+      ? `<span style="font-size:13px;color:var(--plum-lt);font-style:italic">No transactions yet</span>`
+      : years.map(y=>{
+          const cnt=state.transactions.filter(t=>new Date(t.date+"T12:00:00").getFullYear()===y).length;
+          return `<button class="btn btn-export" onclick="exportYearCSV(${y})" style="font-size:11px;padding:8px 14px">⬇ ${y} <span style="opacity:0.8;font-weight:400">(${cnt})</span></button>`;
+        }).join("");
+  }
+
+  // ── Storage status ─────────────────────────────────────────
+  const ss = document.getElementById("storageStatus");
+  if(ss) ss.innerHTML = [
+    {icon:"📋",label:"Transactions",      val:`${state.transactions.length} records`},
+    {icon:"💰",label:"Budget settings",   val:`${Object.keys(state.budgets).filter(k=>state.budgets[k]>0).length} categories set`},
+    {icon:"💾",label:"Auto-save",         val:"Active ✓"},
+  ].map(item=>`
+    <div class="storage-item">
+      <div class="storage-item-left"><span>${item.icon}</span>${item.label}</div>
+      <span class="storage-item-val">${item.val}</span>
+    </div>`).join("");
+
+  // ── Print summary ──────────────────────────────────────────
+  const ps = document.getElementById("printSubtitle");
+  if(ps) ps.textContent = `${mLabel}`;
+  renderPrint(T, BT, CA, left, rollover, mLabel);
+}
+
+function renderPrint(T, BT, CA, left, rollover, mLabel) {
+  const pc = document.getElementById("printContent");
+  if(!pc) return;
+  pc.innerHTML = `
+    <div style="text-align:center;padding:16px 0 24px;border-bottom:2px solid var(--rose-lt);margin-bottom:20px">
+      <div style="font-family:'Playfair Display',serif;font-size:28px;font-style:italic;color:var(--rose-dk)">✦ Bloom Budget</div>
+      <div style="font-size:13px;color:var(--plum-lt);letter-spacing:0.12em;margin-top:4px">${mLabel}</div>
+    </div>
+
+    <div class="print-section">
+      <div class="print-section-title">Cash Flow Overview</div>
+      ${[["+ Rollover", rollover],["+ Total Income",T.Income],[`− Bills`,T.Bills],[`− Expenses`,T.Expenses],[`− Savings`,T.Savings],[`− Debt`,T.Debt]].map(([l,v])=>`
+        <div class="print-row"><span>${l}</span><span>$${fmt(v)}</span></div>`).join("")}
+      <div class="print-row print-row-total" style="padding-top:10px;margin-top:4px;border-top:2px solid var(--rose-lt) !important">
+        <span>Total</span>
+        <span style="color:${left>=0?"var(--sage-dk)":"var(--danger)"}">${cur()}${fmt(left)}</span>
+      </div>
+    </div>
+
+    <div class="print-section">
+      <div class="print-section-title">Income</div>
+      ${INCOME_CATS.filter(c=>CA[c]).map(c=>`<div class="print-row"><span>${c}</span><span>$${fmt(CA[c])}</span></div>`).join("")||`<div class="print-row"><span style="font-style:italic;color:var(--plum-lt)">No income logged</span></div>`}
+    </div>
+
+    <div class="print-section">
+      <div class="print-section-title">Bills</div>
+      ${BILL_CATS.filter(c=>CA[c]||state.budgets[c]).map(c=>`
+        <div class="print-row">
+          <span>${c}</span>
+          <span>$${fmt(CA[c]||0)} ${state.budgets[c]?`<span style="color:var(--plum-lt)">/ $${fmt(state.budgets[c])}</span>`:""}</span>
+        </div>`).join("")||`<div class="print-row"><span style="font-style:italic;color:var(--plum-lt)">No bills logged</span></div>`}
+    </div>
+
+    <div class="print-section">
+      <div class="print-section-title">Expenses</div>
+      ${EXPENSE_CATS.filter(c=>CA[c]||state.budgets[c]).map(c=>`
+        <div class="print-row">
+          <span>${c}</span>
+          <span>$${fmt(CA[c]||0)} ${state.budgets[c]?`<span style="color:var(--plum-lt)">/ $${fmt(state.budgets[c])}</span>`:""}</span>
+        </div>`).join("")||`<div class="print-row"><span style="font-style:italic;color:var(--plum-lt)">No expenses logged</span></div>`}
+    </div>
+
+    <div style="text-align:center;padding-top:20px;border-top:1px dashed var(--rose-lt);color:var(--plum-lt);font-size:11px;font-style:italic">
+      Bloom Budget Planner · Generated ${new Date().toLocaleDateString("en-US",{year:"numeric",month:"long",day:"numeric"})}
+    </div>`;
+}
+
+// ════════════════════════════════════════════════════════════════
+//  ACTIONS
+// ════════════════════════════════════════════════════════════════
+function addTransaction() {
+  const date = document.getElementById("txnDate").value;
+  const cat  = document.getElementById("txnCat").value;
+  const amt  = parseFloat(document.getElementById("txnAmt").value);
+  const note = document.getElementById("txnNote").value;
+  if(!date||!cat||!amt||amt<=0) return;
+  state.transactions.push({ id:Date.now(), date, category:cat, type:getCatType(cat), amount:amt, note });
+  document.getElementById("txnAmt").value  = "";
+  document.getElementById("txnNote").value = "";
+  save(); render();
+}
+
+function deleteTransaction(id) {
+  state.transactions = state.transactions.filter(t=>t.id!==id);
+  save(); render();
+}
+
+function updateTxnType() {
+  const cat  = document.getElementById("txnCat").value;
+  const type = getCatType(cat);
+  const pill = document.getElementById("txnTypePill");
+  if(pill) pill.outerHTML = `<span id="txnTypePill" class="pill pill-${type.toLowerCase()}" style="font-size:12px;padding:5px 14px">${type}</span>`;
+}
+
+
+
+function clearAll() {
+  if(!confirm("Clear ALL saved data? This cannot be undone. Export first!")) return;
+  state.transactions  = [];
+  state.budgets       = {};
+  state.rollover      = 0;
+  document.getElementById("rolloverInp").value = "";
+  save(); render();
+}
+
+// ── Nav / tabs ────────────────────────────────────────────────
+function switchTab(id) {
+  document.querySelectorAll(".tab-panel").forEach(p=>p.classList.remove("active"));
+  document.querySelectorAll(".nav-btn").forEach(b=>b.classList.remove("active"));
+  document.getElementById("tab-"+id).classList.add("active");
+  event.currentTarget.classList.add("active");
+  markMoreActive(id);
+  if(id==="calendar") { renderCalendar(); return; }
+  if(id==="instructions"||id==="license") return;
+  if(id==="settings") { buildSettingsUI(); return; }
+  if(id==="categories") { buildCategoryEditor(); return; }
+  render();
+}
+
+
+
+// ════════════════════════════════════════════════════════════════
+//  EDIT CATEGORIES
+// ════════════════════════════════════════════════════════════════
+function buildCategoryEditor() {
+  const el = document.getElementById('catEditorContent');
+  if (!el) return;
+  const sections = [
+    {key:'income',   label:'Income',   cats:INCOME_CATS,  accent:'var(--sage-dk)', bg:'#EDF5E8'},
+    {key:'bills',    label:'Bills',    cats:BILL_CATS,    accent:'#906030',         bg:'#F8EFE4'},
+    {key:'expenses', label:'Expenses', cats:EXPENSE_CATS, accent:'var(--lav-dk)',   bg:'var(--lav-lt)'},
+    {key:'savings',  label:'Savings',  cats:SAVINGS_CATS, accent:'#407098',         bg:'#E4EEF8'},
+    {key:'debt',     label:'Debt',     cats:DEBT_CATS,    accent:'var(--danger)',   bg:'#F8E8EA'},
+  ];
+  el.innerHTML = sections.map(s => `
+    <div style="margin-bottom:18px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--rose-lt)">
+        <div style="font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:${s.accent};font-weight:700">${s.label}</div>
+        <div style="font-size:10px;color:var(--plum-lt)">${s.cats.length} ${s.cats.length===1?'item':'items'}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px">
+        ${s.cats.map((cat,i) => `
+          <div style="display:flex;align-items:center;gap:6px;padding:8px 10px 8px 12px;background:${s.bg};border-radius:9px;border-left:3px solid ${s.accent}">
+            <input type="text" value="${cat.replace(/"/g,'&quot;')}" data-group="${s.key}" data-idx="${i}" data-original="${cat.replace(/"/g,'&quot;')}"
+              onkeydown="if(event.key==='Enter'){this.blur();}"
+              style="flex:1;border:none;background:transparent;font-size:13px;color:var(--plum);padding:4px 6px;border-radius:6px;font-family:inherit;min-width:0"
+              onfocus="this.style.background='white';this.style.boxShadow='0 0 0 2px var(--lav)'"
+              onblur="this.style.background='transparent';this.style.boxShadow='none';commitMobileCatRename(this)"/>
+            <button type="button" onmousedown="event.preventDefault();deleteMobileCategory('${s.key}',${i})" title="Remove"
+              style="background:none;border:none;cursor:pointer;color:${s.accent};opacity:0.5;font-size:16px;padding:2px 6px;line-height:1;border-radius:6px;flex-shrink:0;transition:opacity .15s,background .15s"
+              onmouseover="this.style.opacity='1';this.style.background='rgba(0,0,0,0.06)'"
+              onmouseout="this.style.opacity='0.5';this.style.background='none'">×</button>
+          </div>`).join('')}
+      </div>
+      <button onclick="addMobileCategory('${s.key}')"
+        style="width:100%;padding:9px 12px;background:white;border:1.5px dashed ${s.accent};border-radius:9px;cursor:pointer;color:${s.accent};font-size:12px;font-weight:600;letter-spacing:0.04em;transition:background .15s;font-family:inherit"
+        onmouseover="this.style.background='${s.bg}'"
+        onmouseout="this.style.background='white'">＋ Add ${s.label} Category</button>
+    </div>`).join('');
+}
+
+function addMobileCategory(group) {
+  const name = prompt('New ' + group + ' category name:');
+  if (!name) return;
+  const trimmed = name.trim();
+  if (!trimmed) return;
+  // Check duplicates across all groups
+  if (getAllCats().includes(trimmed)) {
+    alert('"' + trimmed + '" already exists. Pick a different name.');
+    return;
+  }
+  getCatGroupArray(group).push(trimmed);
+  ALL_CATS = getAllCats();
+  saveCategoryNames();
+  rebuildLogCategoryDropdown();
+  buildCategoryEditor();
+  save(); render();
+}
+
+function deleteMobileCategory(group, idx) {
+  const arr = getCatGroupArray(group);
+  if (!arr || idx >= arr.length) { buildCategoryEditor(); return; }
+  if (arr.length <= 1) {
+    alert('You must keep at least one category in each section.');
+    return;
+  }
+  const name = arr[idx];
+  // Count transactions using this category
+  const used = state.transactions.filter(t => t.category === name).length;
+  let confirmMsg = 'Remove "' + name + '"?';
+  if (used > 0) confirmMsg += '\n\n' + used + ' transaction' + (used===1?'':'s') + ' use this category. They will keep the name but won\'t appear in the dropdown anymore.';
+  if (state.budgets[name]) confirmMsg += '\n\nIts $' + (state.budgets[name]||0).toFixed(2) + ' budget will also be removed.';
+  if (!confirm(confirmMsg)) return;
+  arr.splice(idx, 1);
+  if (state.budgets[name] !== undefined) delete state.budgets[name];
+  ALL_CATS = getAllCats();
+  saveCategoryNames();
+  rebuildLogCategoryDropdown();
+  save();
+  // Defer rebuild so the current click event finishes cleanly
+  setTimeout(() => { render(); buildCategoryEditor(); }, 0);
+}
+
+
+// Safely commit a category rename when the user leaves the input.
+// Uses the data-original attribute to detect real changes and avoid
+// unnecessary re-renders that destroy elements mid-interaction.
+function commitMobileCatRename(input) {
+  const newVal = input.value.trim();
+  const original = input.getAttribute('data-original');
+  if (!newVal || newVal === original) {
+    input.value = original;
+    return;
+  }
+  renameMobileCategory(input);
+}
+
+function renameMobileCategory(input) {
+  const group = input.dataset.group;
+  const idx   = parseInt(input.dataset.idx);
+  const newName = input.value.trim();
+  const arr = getCatGroupArray(group);
+  if (!arr || idx >= arr.length) { return; }
+  if (!newName) { input.value = arr[idx]; return; }
+  const oldName = arr[idx];
+  if (oldName === newName) return;
+  // Block duplicates across all groups
+  if (getAllCats().includes(newName)) {
+    alert('"' + newName + '" already exists. Pick a different name.');
+    input.value = oldName;
+    return;
+  }
+  // Update array
+  arr[idx] = newName;
+  // Update transactions that used the old name
+  state.transactions.forEach(t => { if (t.category === oldName) t.category = newName; });
+  // Update budgets
+  if (state.budgets[oldName] !== undefined) {
+    state.budgets[newName] = state.budgets[oldName];
+    delete state.budgets[oldName];
+  }
+  // Persist
+  saveCategoryNames();
+  ALL_CATS = getAllCats();
+  // Rebuild category dropdown in Log tab
+  rebuildLogCategoryDropdown();
+  save();
+  // Defer the heavy re-render so the current blur event finishes cleanly
+  setTimeout(() => { render(); buildCategoryEditor(); }, 0);
+}
+
+function getCatGroupArray(group) {
+  return {income:INCOME_CATS, bills:BILL_CATS, expenses:EXPENSE_CATS,
+          savings:SAVINGS_CATS, debt:DEBT_CATS}[group];
+}
+
+function saveCategoryNames() {
+  state.catNames = {
+    income:   [...INCOME_CATS],
+    bills:    [...BILL_CATS],
+    expenses: [...EXPENSE_CATS],
+    savings:  [...SAVINGS_CATS],
+    debt:     [...DEBT_CATS],
+  };
+}
+
+function rebuildLogCategoryDropdown() {
+  const sel = document.getElementById('txnCat');
+  if (!sel) return;
+  const prev = sel.value;
+  sel.innerHTML = '';
+  [['── Income ──',INCOME_CATS],['── Bills ──',BILL_CATS],['── Expenses ──',EXPENSE_CATS],
+   ['── Savings ──',SAVINGS_CATS],['── Debt ──',DEBT_CATS]].forEach(([g,cats])=>{
+    const og=document.createElement('optgroup'); og.label=g;
+    cats.forEach(c=>{
+      const o=document.createElement('option'); o.value=c; o.textContent=c;
+      og.appendChild(o);
+    });
+    sel.appendChild(og);
+  });
+  if (ALL_CATS.includes(prev)) sel.value = prev;
+  else sel.value = 'Food';
+  updateTxnType();
+}
+
+function resetMobileCategories() {
+  if (!confirm('Reset all category names back to defaults? Your transactions and budgets are not affected.')) return;
+  INCOME_CATS  = [...DEFAULT_INCOME];
+  BILL_CATS    = [...DEFAULT_BILLS];
+  EXPENSE_CATS = [...DEFAULT_EXPENSES];
+  SAVINGS_CATS = [...DEFAULT_SAVINGS];
+  DEBT_CATS    = [...DEFAULT_DEBT];
+  ALL_CATS = getAllCats();
+  state.catNames = null;
+  rebuildLogCategoryDropdown();
+  buildCategoryEditor();
+  save(); render();
+}
+
+// ════════════════════════════════════════════════════════════════
+//  SETTINGS
+// ════════════════════════════════════════════════════════════════
+const COLOR_THEMES = [
+  {name:"Rose & Lavender", a:"#A66880", b:"#8070B0"},
+  {name:"Peach & Coral",   a:"#C07858", b:"#E09070"},
+  {name:"Sage & Forest",   a:"#608858", b:"#407840"},
+  {name:"Sky & Ocean",     a:"#5888C0", b:"#4070A0"},
+  {name:"Berry & Plum",    a:"#906898", b:"#705080"},
+  {name:"Terracotta",      a:"#B06848", b:"#C08060"},
+  {name:"Dusty Blue",      a:"#7090B0", b:"#5878A0"},
+  {name:"Mint & Teal",     a:"#508880", b:"#407868"},
+];
+
+function buildSettingsUI() {
+  // Swatches
+  const sr = document.getElementById('mobileSwatches');
+  if (!sr) return;
+  sr.innerHTML = COLOR_THEMES.map((t,i) => `
+    <div title="${t.name}" onclick="applyMobileThemePreset(${i})"
+      style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,${t.a},${t.b});
+             cursor:pointer;border:3px solid ${state.settings.colorA===t.a?'#3C2E44':'transparent'};
+             transition:transform .2s;flex-shrink:0"
+      onmouseover="this.style.transform='scale(1.15)'"
+      onmouseout="this.style.transform='scale(1)'">
+    </div>`).join('');
+
+  // Currency buttons
+  const cb = document.getElementById('mobileCurrencyBtns');
+  if (!cb) return;
+  cb.innerHTML = '';
+  ['$','£','€','¥','₹','₩','Fr','A$'].forEach(sym => {
+    const btn = document.createElement('button');
+    btn.className = 'btn btn-ghost';
+    btn.textContent = sym;
+    btn.style.minWidth = '44px';
+    btn.style.fontSize = '13px';
+    if (state.settings.currency === sym) {
+      btn.style.background = `linear-gradient(135deg,${state.settings.colorA},${state.settings.colorB})`;
+      btn.style.color = 'white';
+    }
+    btn.onclick = () => { state.settings.currency=sym; save(); render(); syncSettingsUI(); };
+    cb.appendChild(btn);
+  });
+
+  // Sync inputs
+  const ni = document.getElementById('settingName');
+  const ca = document.getElementById('mColorA');
+  const cb2 = document.getElementById('mColorB');
+  if (ni) ni.value = state.settings.name || '';
+  if (ca) ca.value = state.settings.colorA;
+  if (cb2) cb2.value = state.settings.colorB;
+  const cc = document.getElementById('mCustomCurrency');
+  if (cc) cc.value = ['$','£','€','¥','₹','₩','Fr','A$'].includes(state.settings.currency) ? '' : state.settings.currency;
+  updateMobilePreview();
+}
+
+function syncSettingsUI() { buildSettingsUI(); }
+
+function applyMobileSettings() {
+  const n = document.getElementById('settingName')?.value || 'Bloom Budget';
+  state.settings.name = n;
+  updateMobilePreview();
+  applyMobileBrandNames();
+  save();
+}
+
+function applyMobileColor() {
+  const a = document.getElementById('mColorA')?.value || '#A66880';
+  const b = document.getElementById('mColorB')?.value || '#8070B0';
+  applyMobileTheme(a, b);
+  state.settings.colorA = a;
+  state.settings.colorB = b;
+  save();
+}
+
+function applyMobileThemePreset(i) {
+  const t = COLOR_THEMES[i];
+  applyMobileTheme(t.a, t.b);
+  state.settings.colorA = t.a;
+  state.settings.colorB = t.b;
+  const ca = document.getElementById('mColorA'); if(ca) ca.value = t.a;
+  const cb2 = document.getElementById('mColorB'); if(cb2) cb2.value = t.b;
+  buildSettingsUI();
+  save();
+}
+
+function applyMobileTheme(a, b) {
+  document.documentElement.style.setProperty('--rose-dk', a);
+  document.documentElement.style.setProperty('--lav-dk', b);
+  const prev = document.getElementById('mColorPreview');
+  if (prev) prev.style.background = `linear-gradient(135deg,${a},${b})`;
+  // Update header gradient
+  const hdr = document.querySelector('.app-header');
+  if (hdr) hdr.style.background = `linear-gradient(135deg,${a} 0%,${b} 100%)`;
+  // Update active nav button style
+  const style = document.getElementById('dynamicThemeStyle') || (() => {
+    const s = document.createElement('style');
+    s.id = 'dynamicThemeStyle';
+    document.head.appendChild(s);
+    return s;
+  })();
+  style.textContent = `
+    .nav-btn.active { background: linear-gradient(135deg,${a},${b}) !important; }
+    .btn-primary { background: linear-gradient(135deg,${a},${b}) !important; }
+    .welcome-btn { background: linear-gradient(135deg,${a},${b}) !important; }
+    .welcome-logo { background: linear-gradient(135deg,${a},${b},${a}) !important;
+                    -webkit-background-clip: text !important; }
+  `;
+  updateMobilePreview();
+}
+
+function updateMobilePreview() {
+  const n = state.settings.name || 'Bloom Budget';
+  const pn = document.getElementById('previewName');
+  if (pn) pn.textContent = n;
+  applyMobileBrandNames();
+}
+
+function applyMobileBrandNames() {
+  const n = state.settings.name || 'Bloom Budget';
+  const logo = document.querySelector('.header-logo');
+  if (logo) logo.textContent = '✦ ' + n;
+  const wLogo = document.querySelector('.welcome-logo');
+  if (wLogo) wLogo.textContent = n;
+  document.title = n + ' ✦';
+}
+
+function resetMobileSettings() {
+  if (!confirm('Reset settings to defaults?')) return;
+  state.settings = {name:'Bloom Budget',colorA:'#A66880',colorB:'#8070B0',currency:'$'};
+  applyMobileTheme('#A66880','#8070B0');
+  syncSettingsUI();
+  applyMobileBrandNames();
+  save();
+  render();
+}
+
+// ════════════════════════════════════════════════════════════════
+//  CSV EXPORT
+// ════════════════════════════════════════════════════════════════
+function downloadCSV(content, filename) {
+  const blob = new Blob([content],{type:"text/csv;charset=utf-8;"});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement("a");
+  a.href=url; a.download=filename; a.click();
+  URL.revokeObjectURL(url);
+}
+
+function exportMonthCSV() {
+  const rows = [["Date","Category","Type","Amount","Note"]];
+  monthTxns().sort((a,b)=>new Date(a.date+"T12:00:00")-new Date(b.date+"T12:00:00")).forEach(t=>{
+    rows.push([t.date,`"${t.category}"`,t.type,t.amount.toFixed(2),`"${(t.note||"").replace(/"/g,'""')}"`]);
+  });
+  downloadCSV(rows.map(r=>r.join(",")).join("\n"),
+    `bloom-budget-${MONTHS[state.selectedMonth].toLowerCase()}-${state.selectedYear}.csv`);
+}
+
+function exportFullCSV() {
+  const txnRows = state.transactions.sort((a,b)=>new Date(a.date+"T12:00:00")-new Date(b.date+"T12:00:00"))
+    .map(t=>[t.date,`"${t.category}"`,t.type,t.amount.toFixed(2),`"${(t.note||"").replace(/"/g,'""')}"`]);
+  const budgetRows = ALL_CATS.filter(c=>state.budgets[c])
+    .map(c=>[`"${c}"`,getCatType(c),state.budgets[c].toFixed(2)]);
+  const content = [
+    "TRANSACTIONS",
+    "Date,Category,Type,Amount,Note",
+    ...txnRows.map(r=>r.join(",")),
+    "","BUDGETS","Category,Type,Budget Amount",
+    ...budgetRows.map(r=>r.join(","))].join("\n");
+  downloadCSV(content,`bloom-budget-full-export-${new Date().toISOString().split("T")[0]}.csv`);
+}
+
+function exportYearCSV(year) {
+  const rows = [["Date","Category","Type","Amount","Note"]];
+  state.transactions.filter(t=>new Date(t.date+"T12:00:00").getFullYear()===year)
+    .sort((a,b)=>new Date(a.date+"T12:00:00")-new Date(b.date+"T12:00:00"))
+    .forEach(t=>rows.push([t.date,`"${t.category}"`,t.type,t.amount.toFixed(2),`"${(t.note||"").replace(/"/g,'""')}"`]));
+  downloadCSV(rows.map(r=>r.join(",")).join("\n"),`bloom-budget-${year}.csv`);
+}
+
+// ════════════════════════════════════════════════════════════════
+//  BOOT
+// ════════════════════════════════════════════════════════════════
+
+// ── Mobile More menu ─────────────────────────────────────────
+function toggleMobileMore() {
+  const drop = document.getElementById('moreDrop');
+  const btn  = document.getElementById('moreBtn');
+  const isOpen = drop.classList.contains('open');
+  drop.classList.toggle('open', !isOpen);
+  btn.classList.toggle('open', !isOpen);
+}
+
+function closeMobileMore() {
+  document.getElementById('moreDrop')?.classList.remove('open');
+  document.getElementById('moreBtn')?.classList.remove('open');
+}
+
+// Close when clicking outside
+document.addEventListener('click', function(e) {
+  const wrap = document.querySelector('.more-wrap');
+  if (wrap && !wrap.contains(e.target)) closeMobileMore();
+});
+
+// Highlight active More item
+const _origSwitchTab = switchTab;
+function markMoreActive(id) {
+  ['categories','instructions','settings','license'].forEach(t => {
+    const el = document.getElementById('drop-'+t);
+    if (el) el.classList.toggle('active', t === id);
+  });
+  const moreBtn = document.getElementById('moreBtn');
+  if (moreBtn) moreBtn.classList.toggle('active', ['categories','instructions','settings','license'].includes(id));
+}
+
+init();
+
+
+// ════════════════════════════════════════════════════════
+//  CALENDAR
+// ════════════════════════════════════════════════════════
+const DAY_NAMES = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+
+function renderCalendar() {
+  const m=state.calViewMonth, y=state.calViewYear;
+  const title=document.getElementById("calTitle");
+  if(title) title.textContent=`${MONTHS[m]} ${y}`;
+
+  const hdrEl=document.getElementById("calDayHdrs");
+  if(hdrEl) hdrEl.innerHTML=DAY_NAMES.map(d=>`<div class="cal-day-hdr">${d}</div>`).join("");
+
+  const firstDay=new Date(y,m,1).getDay();
+  const daysInMonth=new Date(y,m+1,0).getDate();
+  const today=new Date();
+  const todayStr=`${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,"0")}-${String(today.getDate()).padStart(2,"0")}`;
+
+  // Bills from mobile transactions (uses t.type === 'Bills')
+  const billDays={};
+  state.transactions.forEach(t=>{
+    const d=new Date(t.date+"T12:00:00");
+    if(d.getMonth()===m && d.getFullYear()===y && t.type==="Bills"){
+      const day=d.getDate();
+      if(!billDays[day]) billDays[day]=[];
+      billDays[day].push(t.category);
+    }
+  });
+
+  let cells="";
+  for(let i=0;i<firstDay;i++) cells+=`<div class="cal-day empty"></div>`;
+
+  for(let day=1;day<=daysInMonth;day++){
+    const dateStr=`${y}-${String(m+1).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
+    const isToday=dateStr===todayStr;
+    const customEntries=state.calEntries[dateStr]||[];
+    const bills=billDays[day]||[];
+    const hasItems=customEntries.length>0||bills.length>0;
+
+    const billHtml=bills.slice(0,2).map(b=>`<div class="cal-entry cal-entry-bill" title="${b}">${b}</div>`).join("");
+    const noteHtml=customEntries.slice(0,2).map(e=>`<div class="cal-entry ${e.type==="bill"?"cal-entry-bill":"cal-entry-note"}" title="${e.text}">${e.text}</div>`).join("");
+    const moreCount=bills.length+customEntries.length-4;
+
+    cells+=`<div class="cal-day${isToday?" today":""}${hasItems?" has-items":""}" onclick="openCalModal('${dateStr}')">
+      <div class="cal-day-num">${day}</div>
+      ${billHtml}${noteHtml}
+      ${moreCount>0?`<div style="font-size:9px;color:var(--plum-lt);margin-top:2px">+${moreCount} more</div>`:""}
+      <button class="cal-add-btn" onclick="event.stopPropagation();openCalModal('${dateStr}')" title="Add">＋</button>
+    </div>`;
+  }
+
+  const cellsEl=document.getElementById("calCells");
+  if(cellsEl) cellsEl.innerHTML=cells;
+}
+
+function calPrev() {
+  if(state.calViewMonth===0){ state.calViewMonth=11; state.calViewYear--; }
+  else state.calViewMonth--;
+  renderCalendar();
+}
+function calNext() {
+  if(state.calViewMonth===11){ state.calViewMonth=0; state.calViewYear++; }
+  else state.calViewMonth++;
+  renderCalendar();
+}
+
+let _calModalDate=null, _calEntryType="note";
+
+function openCalModal(dateStr) {
+  _calModalDate=dateStr;
+  _calEntryType="note";
+  const d=new Date(dateStr+"T12:00:00");
+  document.getElementById("calModalTitle").textContent=d.toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric"});
+  document.getElementById("calEntryText").value="";
+  setCalType("note");
+  renderCalModalEntries();
+  document.getElementById("calModal").style.display="flex";
+  setTimeout(()=>document.getElementById("calEntryText").focus(),100);
+}
+
+function closeCalModal(e) {
+  if(e.target.id==="calModal") document.getElementById("calModal").style.display="none";
+}
+
+function setCalType(type) {
+  _calEntryType=type;
+  document.getElementById("calTypeNote").className="btn btn-sm "+(type==="note"?"btn-primary":"btn-ghost");
+  document.getElementById("calTypeBill").className="btn btn-sm "+(type==="bill"?"btn-primary":"btn-ghost");
+}
+
+function renderCalModalEntries() {
+  const dateStr=_calModalDate;
+  const el=document.getElementById("calModalEntries");
+  const billItems=[];
+  state.transactions.forEach(t=>{
+    const td=new Date(t.date+"T12:00:00");
+    const ds=`${td.getFullYear()}-${String(td.getMonth()+1).padStart(2,"0")}-${String(td.getDate()).padStart(2,"0")}`;
+    if(ds===dateStr && t.type==="Bills") billItems.push(t.category);
+  });
+  const customItems=state.calEntries[dateStr]||[];
+  if(billItems.length===0 && customItems.length===0){
+    el.innerHTML=`<div style="font-size:12px;color:var(--plum-lt);font-style:italic;padding:8px 0">No entries for this day yet.</div>`;
+    return;
+  }
+  el.innerHTML=`
+    ${billItems.length>0?`<div style="font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--plum-lt);font-weight:700;margin-bottom:6px">Bills from Log</div>
+      ${billItems.map(b=>`<div class="cal-entry-row" style="background:#F8EFE0"><span class="cal-entry cal-entry-bill">${b}</span><span style="font-size:11px;color:var(--plum-lt);margin-left:6px">from log</span></div>`).join("")}`:""}
+    ${customItems.length>0?`<div style="font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--plum-lt);font-weight:700;margin:10px 0 6px">Custom Entries</div>
+      ${customItems.map(e=>`<div class="cal-entry-row" style="background:${e.type==="bill"?"#F8EFE0":"var(--lav-lt)"}">
+        <span class="cal-entry ${e.type==="bill"?"cal-entry-bill":"cal-entry-note"}">${e.type==="bill"?"💸":"📝"}</span>
+        <span style="font-size:12px;color:var(--plum-mid);margin-left:6px;flex:1">${e.text}</span>
+        <button class="cal-entry-row-del" onclick="delCalEntry('${dateStr}',${e.id})">✕</button>
+      </div>`).join("")}`:""}
+  `;
+}
+
+function addCalEntry() {
+  const text=document.getElementById("calEntryText").value.trim();
+  if(!text||!_calModalDate) return;
+  if(!state.calEntries[_calModalDate]) state.calEntries[_calModalDate]=[];
+  state.calEntries[_calModalDate].push({id:Date.now(),text,type:_calEntryType});
+  document.getElementById("calEntryText").value="";
+  save(); renderCalModalEntries(); renderCalendar();
+}
+
+function delCalEntry(dateStr,id) {
+  if(!state.calEntries[dateStr]) return;
+  state.calEntries[dateStr]=state.calEntries[dateStr].filter(e=>e.id!==id);
+  if(state.calEntries[dateStr].length===0) delete state.calEntries[dateStr];
+  save(); renderCalModalEntries(); renderCalendar();
+}
+
+// ════════════════════════════════════════════════════════
+//  CSV IMPORT
+// ════════════════════════════════════════════════════════
+function importCSV(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const resultEl = document.getElementById("importResult");
+    try {
+      const text = e.target.result;
+      const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+
+      let section = null;
+      let txnAdded = 0, txnSkipped = 0, budgetsImported = 0;
+      const existingIds = new Set(state.transactions.map(t => t.id));
+      const newBudgets = {};
+
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        if (line === 'TRANSACTIONS') { section = 'txn'; continue; }
+        if (line === 'BUDGETS') { section = 'bud'; continue; }
+        if (line === 'CALENDAR ENTRIES') { section = 'cal'; continue; }
+        if (line.startsWith('Date,') || line.startsWith('Category,')) continue;
+
+        const cols = parseCSVLine(line);
+
+        if (section === 'txn' && cols.length >= 4) {
+          const [date, category, type, amount, note] = cols;
+          const amt = parseFloat(amount);
+          if (!date || !category || isNaN(amt)) continue;
+          const stableId = hashCode(date + category + amount);
+          if (existingIds.has(stableId)) { txnSkipped++; continue; }
+          const catClean = category.replace(/^"+|"+$/g, '');
+          const detectedType = type || getCatType(catClean) || 'Expenses';
+          state.transactions.push({
+            id: stableId, date,
+            category: catClean, type: detectedType,
+            amount: amt, note: (note||'').replace(/^"+|"+$/g,'')
+          });
+          existingIds.add(stableId);
+          txnAdded++;
+        }
+
+        if (section === 'bud' && cols.length >= 3) {
+          const [category, type, amount] = cols;
+          const catClean = category.replace(/^"+|"+$/g, '');
+          newBudgets[catClean] = parseFloat(amount) || 0;
+          budgetsImported++;
+        }
+      }
+
+      if (budgetsImported > 0) Object.assign(state.budgets, newBudgets);
+      save(); render();
+
+      resultEl.style.display = 'block';
+      resultEl.style.background = '#EDF5E8';
+      resultEl.style.color = '#608858';
+      resultEl.style.border = '1px solid #98C090';
+      resultEl.innerHTML = `✓ Done! ${txnAdded} transactions added, ${txnSkipped} skipped, ${budgetsImported} budgets updated.`;
+    } catch(err) {
+      resultEl.style.display = 'block';
+      resultEl.style.background = '#F8E8EA';
+      resultEl.style.color = '#B86878';
+      resultEl.style.border = '1px solid #CC8FA4';
+      resultEl.innerHTML = '✗ Could not read file. Make sure it is a CSV exported from Bloom Budget.';
+    }
+    input.value = '';
+  };
+  reader.readAsText(file);
+}
+
+function parseCSVLine(line) {
+  const result = [];
+  let cur = '', inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (ch === '"') inQuotes = !inQuotes;
+    else if (ch === ',' && !inQuotes) { result.push(cur); cur = ''; }
+    else cur += ch;
+  }
+  result.push(cur);
+  return result;
+}
+
+function hashCode(str) {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = ((hash << 5) - hash) + str.charCodeAt(i);
+    hash |= 0;
+  }
+  return Math.abs(hash);
+}
+
+</script>
+
+<!-- CALENDAR MODAL -->
+<div id="calModal" class="cal-modal-bg" style="display:none" onclick="closeCalModal(event)">
+  <div class="cal-modal" onclick="event.stopPropagation()">
+    <div class="cal-modal-title" id="calModalTitle">Day Entries</div>
+    <div class="cal-entry-list" id="calModalEntries"></div>
+    <div style="border-top:1px solid var(--rose-lt);padding-top:14px">
+      <label class="lbl">Add Note or Bill Reminder</label>
+      <input class="inp" id="calEntryText" type="text" placeholder="e.g. Rent due, Doctor appointment..."
+        style="margin-bottom:10px" onkeydown="if(event.key==='Enter')addCalEntry()"/>
+      <div style="display:flex;gap:8px;margin-bottom:10px">
+        <button class="btn btn-ghost btn-sm" id="calTypeNote" onclick="setCalType('note')" style="flex:1">📝 Note</button>
+        <button class="btn btn-primary btn-sm" id="calTypeBill" onclick="setCalType('bill')" style="flex:1">💸 Bill Reminder</button>
+      </div>
+      <button class="btn btn-primary" style="width:100%" onclick="addCalEntry()">＋ Add to Calendar</button>
+    </div>
+    <button class="btn btn-ghost btn-sm" style="width:100%;margin-top:10px" onclick="document.getElementById('calModal').style.display='none'">Close</button>
+  </div>
+</div>
+
+
+
+
+<!-- Android/Chrome install banner -->
+<div id="installBanner" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:9999;
+  background:linear-gradient(135deg,#A66880,#8070B0);color:white;
+  padding:14px 20px;align-items:center;justify-content:space-between;
+  box-shadow:0 -4px 20px rgba(60,46,68,0.25);gap:12px;">
+  <div style="display:flex;align-items:center;gap:12px;flex:1">
+    <div style="font-size:26px">✦</div>
+    <div>
+      <div style="font-family:'Playfair Display',serif;font-size:14px;font-style:italic;font-weight:bold">Install Bloom Budget</div>
+      <div style="font-size:11px;opacity:0.85;margin-top:2px">Add to your home screen for easy access</div>
+    </div>
+  </div>
+  <div style="display:flex;gap:8px;flex-shrink:0">
+    <button onclick="dismissInstall()" style="background:rgba(255,255,255,0.2);border:none;color:white;
+      padding:8px 14px;border-radius:8px;cursor:pointer;font-size:11px;font-weight:600">Not now</button>
+    <button onclick="installApp()" style="background:white;border:none;color:#A66880;
+      padding:8px 16px;border-radius:8px;cursor:pointer;font-size:11px;font-weight:700">Install ✦</button>
+  </div>
+</div>
+
+<!-- iOS Safari install banner -->
+<div id="iosBanner" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:9999;
+  background:linear-gradient(135deg,#A66880,#8070B0);color:white;
+  padding:14px 20px;flex-direction:column;
+  box-shadow:0 -4px 20px rgba(60,46,68,0.25);">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+    <div style="font-family:'Playfair Display',serif;font-size:14px;font-style:italic;font-weight:bold">✦ Install Bloom Budget</div>
+    <button onclick="dismissIOS()" style="background:none;border:none;color:white;font-size:22px;cursor:pointer;padding:0;line-height:1">×</button>
+  </div>
+  <div style="font-size:12px;opacity:0.9;line-height:1.7">
+    Tap the <strong>Share button</strong> <span style="font-size:15px">⬆</span> at the bottom of Safari,
+    then tap <strong>"Add to Home Screen"</strong> to install this app on your iPhone.
+  </div>
+</div>
+
+<script>
+// ── PWA Service Worker ────────────────────────────────────────
+// Only attempt SW on https:// or http://localhost (not file://, not data:)
+(function () {
+  const proto = location.protocol;
+  const isHosted = (proto === 'https:' || (proto === 'http:' && /^(localhost|127\.0\.0\.1)/.test(location.hostname)));
+
+  // ALWAYS clean up any old SWs registered to this scope (Drift, older Bloom, etc.)
+  // This fixes the "loads as Drift Budget" problem caused by a cached SW from a prior site.
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then(regs => {
+      regs.forEach(reg => {
+        // Unregister any SW whose script URL we don't recognise
+        // (i.e. it's not one we're about to register)
+        if (!reg.active || !reg.active.scriptURL.includes('blob:')) {
+          reg.unregister().then(() => console.log('Old SW unregistered:', reg.scope));
+        }
+      });
+      // Also nuke any stale caches from prior installs
+      if ('caches' in window) {
+        caches.keys().then(keys => {
+          keys.forEach(k => {
+            if (k.indexOf('bloom-mobile-v2') === -1) {
+              caches.delete(k).then(() => console.log('Old cache cleared:', k));
+            }
+          });
+        });
+      }
+    }).catch(() => { /* ignore */ });
+  }
+
+  // Only proceed with registration if we're actually hosted (file:// can't run SWs)
+  if (!isHosted || !('serviceWorker' in navigator)) {
+    console.log('PWA install requires hosting (https or localhost). Open via Netlify/web host.');
+    return;
+  }
+
+  const swCode = `
+const CACHE = 'bloom-mobile-v2';
+const ASSETS = [location.href];
+self.addEventListener('install', e => {
+  e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)));
+  self.skipWaiting();
+});
+self.addEventListener('activate', e => {
+  e.waitUntil(
+    caches.keys().then(keys =>
+      Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
+    ).then(() => self.clients.claim())
+  );
+});
+self.addEventListener('fetch', e => {
+  e.respondWith(
+    caches.match(e.request).then(cached => cached || fetch(e.request).catch(() => cached))
+  );
+});
+`;
+  try {
+    const blob = new Blob([swCode], { type: 'application/javascript' });
+    const swUrl = URL.createObjectURL(blob);
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register(swUrl)
+        .then(() => console.log('Bloom SW registered (inline, v2)'))
+        .catch(e => console.log('SW registration skipped:', e.message));
+    });
+  } catch (err) {
+    console.log('SW init failed (non-fatal):', err.message);
+  }
+})();
+
+// ── Android/Chrome install prompt ────────────────────────────
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  const b = document.getElementById('installBanner');
+  if (b && !localStorage.getItem('install_dismissed')) b.style.display = 'flex';
+});
+
+function installApp() {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  deferredPrompt.userChoice.then(() => {
+    document.getElementById('installBanner').style.display = 'none';
+    deferredPrompt = null;
+  });
+}
+
+function dismissInstall() {
+  document.getElementById('installBanner').style.display = 'none';
+  localStorage.setItem('install_dismissed', '1');
+}
+
+// ── iOS Safari install prompt ─────────────────────────────────
+const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
+const isStandalone = window.navigator.standalone;
+if (isIOS && !isStandalone) {
+  window.addEventListener('load', () => {
+    const b = document.getElementById('iosBanner');
+    if (b && !localStorage.getItem('ios_dismissed')) b.style.display = 'flex';
+  });
+}
+
+function dismissIOS() {
+  document.getElementById('iosBanner').style.display = 'none';
+  localStorage.setItem('ios_dismissed', '1');
+}
+</script>
+
+</body>
+</html>
